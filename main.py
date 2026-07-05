@@ -113,7 +113,11 @@ async def run_pipeline(config_path: str) -> dict:
     resume_score = None
     if resume:
         try:
-            resume_score = len(resume.skills)
+            skill_score = min(len(resume.skills), 30)
+            project_score = min(len(resume.projects) * 15, 30)
+            work_score = min(len(resume.work) * 20, 25)
+            edu_score = 15 if resume.education else 0
+            resume_score = skill_score + project_score + work_score + edu_score
             resume_score = min(resume_score, 100)
         except Exception:
             pass

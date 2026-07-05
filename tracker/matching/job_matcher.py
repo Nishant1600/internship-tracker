@@ -72,10 +72,13 @@ class JobMatcher:
 
         resume_skills_lower = {s.lower() for s in resume.skills}
         projects_text = " ".join(resume.projects).lower()
+        work_text = " ".join(resume.work).lower()
+        edu_text = " ".join(resume.education).lower()
+        all_resume_text = projects_text + " " + work_text + " " + edu_text
 
         matched: list[str] = []
         for skill in sorted(required):
-            if skill.lower() in resume_skills_lower or skill.lower() in projects_text:
+            if skill.lower() in resume_skills_lower or skill.lower() in all_resume_text:
                 matched.append(skill)
 
         if matched:
