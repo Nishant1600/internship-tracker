@@ -1,0 +1,27 @@
+{
+  "postings": [
+    {
+      "title": "Software Engineer Intern",
+      "location": {
+        "city": "Bangalore",
+        "state": "Karnataka",
+        "country": "India"
+      },
+      "employmentType": {
+        "name": "Intern"
+      },
+      "descriptionHtml": "<p>Join our team as a Software Engineer Intern. Work on Python and React.</p>",
+      "descriptionPlain": "Join our team as a Software Engineer Intern. Work on Python and React.",
+      "publishedDate": "2026-06-15T10:00:00Z",
+      "hostedUrl": "https://jobs.ashbyhq.com/example/swe-intern-001"
+    },
+    {
+      "title": "Data Science Intern",
+      "location": "Remote, India",
+      "employmentType": "Intern",
+      "descriptionHtml": "<p>Data Science Intern position working on ML models.</p>",
+      "publishedDate": "2026-06-20T10:00:00Z",
+      "hostedUrl": "https://jobs.ashbyhq.com/example/ds-intern-002"
+    }
+  ]
+}

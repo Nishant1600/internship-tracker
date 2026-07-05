@@ -1,0 +1,102 @@
+schedule:
+  time: "08:00"
+  timezone: "Asia/Kolkata"
+
+database:
+  path: "./data/jobs.db"
+
+logging:
+  level: "INFO"
+  file: "./logs/tracker.log"
+
+scraper:
+  timeout_seconds: 15
+  retry_count: 1
+  retry_backoff_seconds: 5
+  headless: true
+
+filters:
+  role_keywords:
+    include:
+      - "intern"
+      - "internship"
+      - "research intern"
+      - "new grad"
+      - "new graduate"
+    exclude:
+      - "senior"
+      - "lead"
+      - "manager"
+      - "director"
+      - "staff"
+      - "principal"
+  title_keywords:
+    include:
+      - "software engineer"
+      - "SWE"
+      - "software development"
+      - "quantitative"
+      - "quant"
+      - "data science"
+      - "machine learning"
+      - "ML"
+      - "research"
+      - "risk analyst"
+    exclude: []
+  locations:
+    include:
+      - "india"
+      - "bangalore"
+      - "hyderabad"
+      - "pune"
+      - "delhi"
+      - "mumbai"
+      - "gurugram"
+      - "noida"
+      - "chennai"
+      - "remote"
+    exclude:
+      - "us only"
+      - "eu only"
+  employment_types:
+    include:
+      - "intern"
+      - "internship"
+      - "contract"
+    exclude:
+      - "full-time"
+  allowed_grad_years:
+    - 2027
+    - 2028
+    - 2029
+    - ~
+  max_posting_age_days: 30
+  minimum_match_score: 0
+
+hiring_agent:
+  enabled: true
+  repo_path: "../hiring-agent-main"
+  python_path: "../hiring-agent-main/.venv/bin/python"
+  resume_path: "./data/resume.pdf"
+  rerun_on_resume_change: true
+  cache_dir: "./data/hiring_agent_cache"
+  llm_backend: "gemini"
+  ollama_base_url: "http://localhost:11434"
+
+telegram:
+  enabled: true
+  max_jobs_per_digest: 25
+  send_if_empty: false
+
+features:
+  hiring_agent_scoring: false
+  dedup_notifications: true
+  track_seen_only: false
+
+aggregator_feeds:
+  enabled: false
+
+companies:
+  - name: "Stripe"
+    ats: "greenhouse"
+    url: "https://boards-api.greenhouse.io/v1/boards/stripe/jobs?content=true"

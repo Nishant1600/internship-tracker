@@ -1,0 +1,75 @@
+name: Daily Internship Alert
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.13"
+  OLLAMA_MODEL: "gemma3:4b"
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: internship-tracker
+
+      - uses: actions/checkout@v4
+        with:
+          repository: hemangv/internship-hiring-agent
+          path: hiring-agent-main
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Cache Ollama model
+        id: cache-ollama
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama
+          key: ollama-${{ env.OLLAMA_MODEL }}
+
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Pull model
+        if: steps.cache-ollama.outputs.cache-hit != 'true'
+        run: ollama pull ${{ env.OLLAMA_MODEL }}
+
+      - name: Start Ollama service
+        run: |
+          ollama serve &
+          sleep 3
+          ollama list
+
+      - name: Install tracker dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r internship-tracker/requirements.txt
+
+      - name: Setup hiring-agent venv
+        run: |
+          python -m venv hiring-agent-main/.venv
+          hiring-agent-main/.venv/bin/pip install -r hiring-agent-main/requirements.txt
+
+      - name: Install Playwright browsers
+        run: |
+          pip install playwright
+          python -m playwright install chromium
+
+      - name: Run pipeline
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          PYTHONPATH: ${{ github.workspace }}/internship-tracker
+          DEFAULT_MODEL: ${{ env.OLLAMA_MODEL }}
+        run: python internship-tracker/main.py --run-now --config internship-tracker/config.yaml

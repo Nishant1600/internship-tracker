@@ -1,0 +1,38 @@
+[
+  {
+    "text": "Software Engineer Intern",
+    "categories": {
+      "location": "Bangalore, India",
+      "commitment": "Intern",
+      "team": "Engineering"
+    },
+    "description": "<p>Join our engineering team as a Software Engineer Intern. You will work on building scalable systems using Python and Go.</p>",
+    "descriptionPlain": "Join our engineering team as a Software Engineer Intern. You will work on building scalable systems using Python and Go.",
+    "createdAt": 1789488000000,
+    "hostedUrl": "https://jobs.lever.co/example/swc-intern-001"
+  },
+  {
+    "text": "Data Science Intern",
+    "categories": {
+      "location": "Mumbai, India",
+      "commitment": "Intern",
+      "team": "Data Science"
+    },
+    "description": "<p>Looking for a Data Science Intern to work on machine learning models and data pipelines.</p>",
+    "descriptionPlain": "Looking for a Data Science Intern to work on machine learning models and data pipelines.",
+    "createdAt": 1789401600000,
+    "hostedUrl": "https://jobs.lever.co/example/ds-intern-002"
+  },
+  {
+    "text": "Senior Software Engineer",
+    "categories": {
+      "location": "Bangalore, India",
+      "commitment": "Full-Time",
+      "team": "Engineering"
+    },
+    "description": "<p>Senior role requiring 5+ years of experience.</p>",
+    "descriptionPlain": "Senior role requiring 5+ years of experience.",
+    "createdAt": 1788796800000,
+    "hostedUrl": "https://jobs.lever.co/example/sr-swe-003"
+  }
+]

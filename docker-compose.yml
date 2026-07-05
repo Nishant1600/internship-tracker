@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  tracker:
+    build: .
+    container_name: internship-tracker
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ../hiring-agent-main:/app/../hiring-agent-main:ro
+    command: ["--daemon"]

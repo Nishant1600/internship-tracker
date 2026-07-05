@@ -1,0 +1,212 @@
+{
+  "basics": {
+    "name": "Hemang Varshney",
+    "email": "htv0825@gmail.com",
+    "phone": "+91 8103706356",
+    "url": null,
+    "summary": "Aspiring Quantitative Researcher and Software Engineer with a strong foundation in C/C++, algorithms, probability, statistics, and machine learning. Passionate about mathematical problem solving, and analytical reasoning, with experience exploring competitive programming and quantitative concepts.",
+    "location": {
+      "address": null,
+      "postalCode": null,
+      "city": "Delhi",
+      "countryCode": "IN",
+      "region": null
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": null,
+        "url": "https://www.linkedin.com/in/hemang-varshney-76b15437a/"
+      },
+      {
+        "network": "GitHub",
+        "username": null,
+        "url": "https://github.com/hemv-857"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Zetheta Algorithms Private Ltd",
+      "position": "Quantitative Risk Analyst Intern",
+      "url": null,
+      "startDate": "2026-01",
+      "endDate": "2026-03",
+      "summary": "Engineered 3+ quantitative risk dashboards in Python and R, reducing manual reporting time by 40% through automated simulation pipelines. Designed and validated 4 probabilistic decision-theoretic and causal inference models, improving model accuracy by identifying key structural assumptions. Conducted scenario-based sensitivity analysis across 8+ market conditions, quantifying model robustness and exposure behaviour to inform risk-aware trading decisions.",
+      "highlights": [
+        "Engineered 3+ quantitative risk dashboards in Python and R, reducing manual reporting time by 40% through automated simulation pipelines.",
+        "Designed and validated 4 probabilistic decision-theoretic and causal inference models, improving model accuracy by identifying key structural assumptions.",
+        "Conducted scenario-based sensitivity analysis across 8+ market conditions, quantifying model robustness and exposure behaviour to inform risk-aware trading decisions."
+      ]
+    }
+  ],
+  "volunteer": null,
+  "education": [
+    {
+      "institution": "University of Delhi — Faculty of Technology",
+      "url": null,
+      "area": "Computer Science and Engineering",
+      "studyType": "Bachelor of Technology",
+      "startDate": "2025-08",
+      "endDate": "2029-08",
+      "score": "8 SGPA",
+      "courses": null
+    }
+  ],
+  "awards": [
+    {
+      "title": "First Runner-Up",
+      "date": null,
+      "awarder": "Fincortex — IIT Roorkee (COMET’26 — CDC)",
+      "summary": null
+    },
+    {
+      "title": "All India Rank 18",
+      "date": null,
+      "awarder": "Techkriti — IIT Kanpur (TOSC Competition)",
+      "summary": null
+    },
+    {
+      "title": "International Rank 12",
+      "date": null,
+      "awarder": "Science Olympiad Foundation (SOF) Olympiads",
+      "summary": null
+    },
+    {
+      "title": "International Rank 52",
+      "date": null,
+      "awarder": "Science Olympiad Foundation (SOF) Olympiads",
+      "summary": null
+    },
+    {
+      "title": "International Rank 178",
+      "date": null,
+      "awarder": "Science Olympiad Foundation (SOF) Olympiads",
+      "summary": null
+    }
+  ],
+  "certificates": null,
+  "publications": null,
+  "skills": [
+    {
+      "name": "Programming Languages",
+      "level": null,
+      "keywords": [
+        "Python",
+        "R",
+        "C",
+        "C++",
+        "YAML"
+      ]
+    },
+    {
+      "name": "Quantitative & Statistical",
+      "level": null,
+      "keywords": [
+        "Monte Carlo Simulation",
+        "Probability Theory",
+        "Statistical Modelling",
+        "Risk Assessment",
+        "Causal Inference",
+        "Decision Theory",
+        "Financial Mathematics",
+        "Algorithmic Trading"
+      ]
+    },
+    {
+      "name": "Libraries & Frameworks",
+      "level": null,
+      "keywords": [
+        "NumPy",
+        "Pandas",
+        "Matplotlib",
+        "Scikit-learn"
+      ]
+    },
+    {
+      "name": "Developer Tools",
+      "level": null,
+      "keywords": [
+        "Git",
+        "GitHub",
+        "PyCharm",
+        "Jupyter Notebook"
+      ]
+    },
+    {
+      "name": "Finance Domain",
+      "level": null,
+      "keywords": [
+        "Quantitative Analysis",
+        "Risk Modelling",
+        "Kelly Criterion",
+        "Probability Calibration",
+        "Backtesting",
+        "Value-at-Risk (VaR)"
+      ]
+    }
+  ],
+  "languages": null,
+  "interests": null,
+  "references": null,
+  "projects": [
+    {
+      "name": "Kelly Betting Simulation",
+      "startDate": null,
+      "endDate": null,
+      "description": "Built a Monte Carlo simulation framework executing 10,000+ iterations to evaluate Kelly Criterion-based betting strategies, benchmarking 5 distinct allocation strategies (full Kelly, fractional Kelly, fixed-stake variants). Quantified long-term wealth growth, maximum drawdown, and volatility metrics; demonstrated that a half-Kelly strategy reduced drawdown by up to 35% compared to full-Kelly under probability misestimation scenarios.",
+      "highlights": [],
+      "url": "https://github.com/hemv-857/Kelly_Betting_Simulation",
+      "technologies": [
+        "Python",
+        "NumPy",
+        "Matplotlib",
+        "Monte Carlo Methods"
+      ],
+      "skills": [
+        "Python",
+        "NumPy",
+        "Matplotlib",
+        "Monte Carlo Methods"
+      ]
+    },
+    {
+      "name": "Probability Calibration Analysis",
+      "startDate": null,
+      "endDate": null,
+      "description": "Evaluated 3 calibration methods (Platt Scaling, Isotonic Regression, Histogram Binning) across 1,000+ prediction samples, systematically diagnosing overconfidence and underconfidence in probabilistic classifiers. Produced calibration curves and Brier score breakdowns that improved model interpretability for non-technical stakeholders.",
+      "highlights": [],
+      "url": "https://github.com/hemv-857/Probability_Calibration_Analysis",
+      "technologies": [
+        "Python",
+        "Scikit-learn",
+        "Pandas",
+        "Reliability Diagrams"
+      ],
+      "skills": [
+        "Python",
+        "Scikit-learn",
+        "Pandas",
+        "Reliability Diagrams"
+      ]
+    },
+    {
+      "name": "Value of Information (VOI) Analysis",
+      "startDate": null,
+      "endDate": null,
+      "description": "Simulated 6+ decision scenarios under uncertainty to compute Expected Value of Perfect Information (EVPI) and Expected Value of Sample Information (EVSI), quantifying the monetary ceiling on information acquisition. Applied utility-based and decision-theoretic frameworks to rank information sources by value, demonstrating a 2.4 × cost-effectiveness improvement in two illustrative trading contexts.",
+      "highlights": [],
+      "url": "https://github.com/hemv-857/Value_of_Information_Analysis",
+      "technologies": [
+        "Python",
+        "Decision Theory",
+        "Utility Functions"
+      ],
+      "skills": [
+        "Python",
+        "Decision Theory",
+        "Utility Functions"
+      ]
+    }
+  ]
+}

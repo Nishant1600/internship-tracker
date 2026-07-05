@@ -1,0 +1,32 @@
+{
+  "content": [
+    {
+      "name": "Software Engineer Intern",
+      "location": {
+        "city": "Bangalore",
+        "state": "Karnataka",
+        "country": "India"
+      },
+      "typeOfEmployment": {
+        "label": "Intern"
+      },
+      "jobAd": "Join our engineering team as an intern working on Python and Go.",
+      "postedDate": "2026-06-15T10:00:00Z",
+      "url": "https://careers.smartrecruiters.com/example/swe-intern"
+    },
+    {
+      "name": "Quantitative Research Intern",
+      "location": {
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "country": "India"
+      },
+      "typeOfEmployment": {
+        "label": "Intern"
+      },
+      "jobAd": "Quantitative research intern working on statistical models.",
+      "postedDate": "2026-06-18T10:00:00Z",
+      "url": "https://careers.smartrecruiters.com/example/quant-intern"
+    }
+  ]
+}

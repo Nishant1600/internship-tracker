@@ -1,0 +1,18 @@
+[
+  {
+    "jobTitle": "Software Engineer Intern",
+    "location": "Bangalore, India",
+    "employmentType": "Intern",
+    "description": "Looking for a Software Engineer Intern with Python skills.",
+    "postedDate": "2026-06-15",
+    "url": "https://example.bamboohr.com/jobs/view.php?id=1"
+  },
+  {
+    "jobTitle": "Data Analyst Intern",
+    "location": "Mumbai, India",
+    "employmentType": "Intern",
+    "description": "Data analyst intern working with SQL and Python.",
+    "postedDate": "2026-06-20",
+    "url": "https://example.bamboohr.com/jobs/view.php?id=2"
+  }
+]

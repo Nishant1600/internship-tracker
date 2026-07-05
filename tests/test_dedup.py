@@ -1,0 +1,77 @@
+from tracker.database import JobRepository, compute_hash
+from tracker.models import RawJob
+
+
+def test_compute_hash_is_consistent():
+    h1 = compute_hash("Stripe", "SWE Intern", "https://stripe.com/jobs/1")
+    h2 = compute_hash("Stripe", "SWE Intern", "https://stripe.com/jobs/1")
+    assert h1 == h2
+
+
+def test_compute_hash_differs_on_company():
+    h1 = compute_hash("Stripe", "SWE Intern", "https://stripe.com/jobs/1")
+    h2 = compute_hash("Razorpay", "SWE Intern", "https://stripe.com/jobs/1")
+    assert h1 != h2
+
+
+def test_compute_hash_differs_on_url():
+    h1 = compute_hash("Stripe", "SWE Intern", "https://stripe.com/jobs/1")
+    h2 = compute_hash("Stripe", "SWE Intern", "https://stripe.com/jobs/2")
+    assert h1 != h2
+
+
+def test_repo_upsert_and_dedup(tmp_path):
+    repo = JobRepository(str(tmp_path / "test.db"))
+    job = RawJob(
+        company="Stripe",
+        title="SWE Intern",
+        location="Bangalore",
+        url="https://stripe.com/jobs/1",
+        description="Python intern",
+        employment_type="Intern",
+        date_posted="2026-06-15T10:00:00Z",
+        source_ats="greenhouse",
+    )
+    inserted = repo.upsert(job)
+    assert inserted is not None
+    assert inserted.id is not None
+    assert repo.is_seen(job) is True
+    assert repo.is_notified(job) is False
+
+    dup = repo.upsert(job)
+    assert dup is not None
+    assert repo.count() == 1
+
+    repo.close()
+
+
+def test_mark_notified(tmp_path):
+    repo = JobRepository(str(tmp_path / "test.db"))
+    job = RawJob(
+        company="Stripe",
+        title="SWE Intern",
+        location="Bangalore",
+        url="https://stripe.com/jobs/2",
+        description=None,
+        employment_type=None,
+        date_posted=None,
+        source_ats="greenhouse",
+    )
+    inserted = repo.upsert(job)
+    assert repo.is_notified(job) is False
+    repo.mark_notified(inserted.id)
+    assert repo.is_notified(job) is True
+    repo.close()
+
+
+def test_get_unnotified(tmp_path):
+    repo = JobRepository(str(tmp_path / "test.db"))
+    j1 = RawJob("A", "SWE Intern", None, "https://a.com/1", None, None, None, "greenhouse")
+    j2 = RawJob("B", "DS Intern", None, "https://b.com/1", None, None, None, "lever")
+    r1 = repo.upsert(j1)
+    repo.upsert(j2)
+    repo.mark_notified(r1.id)
+    unnotified = repo.get_unnotified()
+    assert len(unnotified) == 1
+    assert unnotified[0].company == "B"
+    repo.close()
