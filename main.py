@@ -30,8 +30,8 @@ def _is_playwright_scraper(scraper) -> bool:
     return getattr(mod, "PLAYWRIGHT_AVAILABLE", False)
 
 
-_COMPANY_TIMEOUT_SECONDS = 60
-_PLAYWRIGHT_TIMEOUT_SECONDS = 180
+_COMPANY_TIMEOUT_SECONDS = 600
+_PLAYWRIGHT_TIMEOUT_SECONDS = 600
 
 
 async def _scrape_company(company, config, repo, logger) -> list:
