@@ -30,7 +30,7 @@ def _is_playwright_scraper(scraper) -> bool:
     return getattr(mod, "PLAYWRIGHT_AVAILABLE", False)
 
 
-_COMPANY_TIMEOUT_SECONDS = 60
+_COMPANY_TIMEOUT_SECONDS = 180
 
 
 async def _scrape_company(company, config, repo, logger) -> list:
@@ -58,10 +58,8 @@ async def _scrape_company(company, config, repo, logger) -> list:
             logger.error("[%s] Timed out after %ds (attempt %d)", company.name, _COMPANY_TIMEOUT_SECONDS, attempt + 1)
             if _is_playwright_scraper(scraper):
                 gc.collect()
-            if attempt == config.scraper.retry_count - 1:
-                raw_jobs = []
-                break
-            await asyncio.sleep(2)
+            raw_jobs = []
+            break
         except (BrokenPipeError, ConnectionError, OSError) as e:
             logger.error("[%s] Playwright pipe error (attempt %d): %s", company.name, attempt + 1, e)
             gc.collect()
