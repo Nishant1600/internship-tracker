@@ -23,14 +23,32 @@ class GreenhouseScraper(BaseScraper):
 
     async def fetch(self) -> AsyncIterator[RawJob]:
         url = self.url
-        params: dict[str, str | int] = {"content": "true"}
+        # Extract board name from URL — format: .../boards/{board}/jobs...
+        parts = url.rstrip("/").split("/")
+        # Try to find 'boards' in the path and take the next segment
+        board = ""
+        for i, part in enumerate(parts):
+            if part == "boards" and i + 1 < len(parts):
+                board = parts[i + 1].split("?")[0]
+                break
+        if not board:
+            # Fallback: try last segment (e.g. .../phonepe or .../boards/razorpay/jobs)
+            last = parts[-1].split("?")[0]
+            # If last segment is 'jobs' or empty, use second-to-last
+            if last in ("jobs", ""):
+                board = parts[-2].split("?")[0] if len(parts) >= 2 else ""
+            else:
+                board = last
+        # Use the JSON API
+        api_url = f"https://api.greenhouse.io/v1/boards/{board}/jobs"
+        params: dict[str, str | int] = {}
         page = 1
 
-        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds, follow_redirects=True) as client:
             while True:
                 params["page"] = page
                 try:
-                    resp = await client.get(url, params=params)
+                    resp = await client.get(api_url, params=params)
                     if resp.status_code == 404:
                         self._log_skip(f"Board returned 404 for {self.company}")
                         return
@@ -45,6 +63,8 @@ class GreenhouseScraper(BaseScraper):
                     parsed = self._parse_job(job_data)
                     if parsed:
                         yield parsed
+
+                self._log_info(f"Page {page}: {len(jobs)} jobs for {self.company}")
 
                 meta = data.get("meta", {})
                 total_pages = meta.get("total_pages", 1)
@@ -104,3 +124,7 @@ class GreenhouseScraper(BaseScraper):
     def _log_error(self, msg: str) -> None:
         import logging
         logging.getLogger("tracker").error("[Greenhouse] %s", msg)
+
+    def _log_info(self, msg: str) -> None:
+        import logging
+        logging.getLogger("tracker").info("[Greenhouse] %s", msg)

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
@@ -28,23 +28,5 @@ class Job:
     date_posted: Optional[str]
     date_found: str
     date_last_seen: str
-    match_score: Optional[int]
-    match_reasons: Optional[str]
     notified_at: Optional[str]
     source_ats: str
-
-
-@dataclass
-class StructuredResume:
-    name: str
-    skills: list[str]
-    education: list[str]
-    work: list[str]
-    projects: list[str]
-    certifications: list[str]
-
-
-@dataclass
-class MatchResult:
-    score: int
-    reasons: list[str] = field(default_factory=list)

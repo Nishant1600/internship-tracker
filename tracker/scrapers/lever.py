@@ -56,6 +56,8 @@ class LeverScraper(BaseScraper):
                 if parsed:
                     yield parsed
 
+            self._log_info(f"Yielded {len(data)} jobs for {self.company}")
+
     def _parse_posting(self, posting: dict[str, Any]) -> RawJob | None:
         title = _safe_str(posting.get("text") or "").strip()
         if not title:
@@ -90,3 +92,7 @@ class LeverScraper(BaseScraper):
     def _log_warning(self, msg: str) -> None:
         import logging
         logging.getLogger("tracker").warning("[Lever] %s", msg)
+
+    def _log_info(self, msg: str) -> None:
+        import logging
+        logging.getLogger("tracker").info("[Lever] %s", msg)

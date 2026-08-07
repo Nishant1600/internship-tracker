@@ -51,25 +51,6 @@ class FiltersConfig(BaseModel):
     employment_types: FilterList = Field(default_factory=FilterList)
     allowed_grad_years: list[Optional[int]] = Field(default_factory=lambda: [None])
     max_posting_age_days: int = 30
-    minimum_match_score: int = 0
-
-
-class HiringAgentConfig(BaseModel):
-    enabled: bool = False
-    repo_path: str = "../hiring-agent-main"
-    python_path: str = "../hiring-agent-main/.venv/bin/python"
-    resume_path: str = "./data/resume.pdf"
-    rerun_on_resume_change: bool = True
-    cache_dir: str = "./data/hiring_agent_cache"
-    llm_backend: str = "gemini"
-    ollama_base_url: str = "http://localhost:11434"
-
-    @field_validator("llm_backend")
-    @classmethod
-    def validate_backend(cls, v: str) -> str:
-        if v not in ("gemini", "ollama"):
-            raise ValueError(f"llm_backend must be 'gemini' or 'ollama', got '{v}'")
-        return v
 
 
 class TelegramConfig(BaseModel):
@@ -79,7 +60,6 @@ class TelegramConfig(BaseModel):
 
 
 class FeaturesConfig(BaseModel):
-    hiring_agent_scoring: bool = True
     dedup_notifications: bool = True
     track_seen_only: bool = False
 
@@ -101,6 +81,11 @@ class CompanyConfig(BaseModel):
     ats: str
     url: str
     css_selector: Optional[str] = None
+    company_id: Optional[str] = None
+    domain: Optional[str] = None
+    account_name: Optional[str] = None
+    org_id: Optional[str] = None
+    skip_location_filter: bool = False
 
     @field_validator("ats")
     @classmethod
@@ -108,11 +93,33 @@ class CompanyConfig(BaseModel):
         allowed = {
             "greenhouse", "lever", "ashby", "workday",
             "smartrecruiters", "bamboohr", "icims", "html",
-            "aggregator", "direct",
+            "aggregator", "direct", "tcs",
+            "successfactors", "phenompeople", "custom-portal", "custom-api",
+            "google", "openai", "notion", "netflix", "meta", "microsoft", "block", "jobvite", "qburst", "swiggy", "zwayam", "linkedin", "kula", "turbohire", "payu", "walmart", "atlassian", "eightfold", "sap", "oracle", "ibm", "cisco", "texasinstruments", "qualcomm", "dell", "netapp", "nutanix", "honeywell", "moengage", "morganstanley", "goldmansachs",             "americanexpress", "hsbc", "jpmorgan", "bnymellon", "talentlink", "amd", "arista", "hpe",
         }
         if v not in allowed:
             raise ValueError(f"Unknown ATS type '{v}'. Allowed: {', '.join(sorted(allowed))}")
         return v
+
+
+class TieredCompanies(BaseModel):
+    """Holds companies grouped by difficulty tier."""
+    tiers: dict[str, list[CompanyConfig]] = Field(default_factory=dict)
+
+    def flat(self) -> list[CompanyConfig]:
+        """Return all companies as a flat list."""
+        result = []
+        for tier_companies in self.tiers.values():
+            result.extend(tier_companies)
+        return result
+
+    def by_tier(self) -> list[tuple[str, list[CompanyConfig]]]:
+        """Return companies grouped by tier in order."""
+        return [(name, companies) for name, companies in self.tiers.items()]
+
+    @property
+    def total(self) -> int:
+        return sum(len(c) for c in self.tiers.values())
 
 
 class AppConfig(BaseModel):
@@ -121,11 +128,10 @@ class AppConfig(BaseModel):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     scraper: ScraperConfig = Field(default_factory=ScraperConfig)
     filters: FiltersConfig = Field(default_factory=FiltersConfig)
-    hiring_agent: HiringAgentConfig = Field(default_factory=HiringAgentConfig)
     telegram: TelegramConfig = Field(default_factory=TelegramConfig)
     features: FeaturesConfig = Field(default_factory=FeaturesConfig)
     aggregator_feeds: AggregatorFeedConfig = Field(default_factory=AggregatorFeedConfig)
-    companies: list[CompanyConfig] = Field(default_factory=list)
+    companies: TieredCompanies = Field(default_factory=TieredCompanies)
 
 
 def load_config(path: str | Path) -> AppConfig:
@@ -136,4 +142,11 @@ def load_config(path: str | Path) -> AppConfig:
         raw = yaml.safe_load(f)
     if not isinstance(raw, dict):
         raise ValueError(f"Config file is empty or invalid YAML: {path}")
+
+    companies_raw = raw.get("companies", {})
+    if isinstance(companies_raw, list):
+        raw["companies"] = {"tiers": {"default": companies_raw}}
+    elif isinstance(companies_raw, dict):
+        raw["companies"] = {"tiers": companies_raw}
+
     return AppConfig(**raw)

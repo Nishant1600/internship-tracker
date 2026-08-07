@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   tracker:
     build: .
@@ -11,5 +9,4 @@ services:
       - ./config.yaml:/app/config.yaml:ro
       - ./data:/app/data
       - ./logs:/app/logs
-      - ../hiring-agent-main:/app/../hiring-agent-main:ro
     command: ["--daemon"]

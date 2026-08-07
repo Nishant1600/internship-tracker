@@ -75,7 +75,7 @@ def _check_grad_year(title: str, description: str | None, allowed_years: list[Op
     return False
 
 
-def check_job_filters(job: RawJob, config: FiltersConfig) -> tuple[bool, list[str]]:
+def check_job_filters(job: RawJob, config: FiltersConfig, skip_location_filter: bool = False) -> tuple[bool, list[str]]:
     reasons: list[str] = []
     title = job.title or ""
     description = job.description or ""
@@ -107,16 +107,14 @@ def check_job_filters(job: RawJob, config: FiltersConfig) -> tuple[bool, list[st
         if not _list_match(title, title_include):
             return False, ["No matching title keyword"]
 
-    if loc_exclude:
+    if loc_exclude and not skip_location_filter:
         if job.location and _list_match(job.location, loc_exclude):
             return False, ["Excluded by location"]
 
-    if loc_include:
+    if loc_include and not skip_location_filter:
         if job.location:
             if not _list_match(job.location, loc_include):
-                reasons.append("Location not in include list")
-        elif loc_include:
-            reasons.append("No location specified")
+                return False, ["Location not in include list"]
 
     if emp_exclude:
         if job.employment_type and _list_match(job.employment_type, emp_exclude):
@@ -125,9 +123,9 @@ def check_job_filters(job: RawJob, config: FiltersConfig) -> tuple[bool, list[st
     if emp_include:
         if job.employment_type:
             if not _list_match(job.employment_type, emp_include):
-                reasons.append("Employment type not in include list")
-        elif emp_include:
-            reasons.append("No employment type specified")
+                return False, ["Employment type not in include list"]
+        else:
+            return False, ["No employment type specified"]
 
     if not _check_grad_year(title, description, config.allowed_grad_years):
         return False, ["Graduation year not in allowed list"]

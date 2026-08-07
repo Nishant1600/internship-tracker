@@ -1,5 +1,4 @@
 import hashlib
-import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,8 +19,6 @@ CREATE TABLE IF NOT EXISTS jobs (
     date_posted       TEXT,
     date_found        TEXT NOT NULL,
     date_last_seen    TEXT NOT NULL,
-    match_score       INTEGER,
-    match_reasons     TEXT,
     notified_at       TEXT,
     source_ats        TEXT NOT NULL
 );
@@ -64,8 +61,6 @@ class JobRepository:
             date_posted=row["date_posted"],
             date_found=row["date_found"],
             date_last_seen=row["date_last_seen"],
-            match_score=row["match_score"],
-            match_reasons=row["match_reasons"],
             notified_at=row["notified_at"],
             source_ats=row["source_ats"],
         )
@@ -140,16 +135,9 @@ class JobRepository:
         )
         self._conn.commit()
 
-    def set_match(self, job_id: int, score: int, reasons: list[str]) -> None:
-        self._conn.execute(
-            "UPDATE jobs SET match_score = ?, match_reasons = ? WHERE id = ?",
-            (score, json.dumps(reasons), job_id),
-        )
-        self._conn.commit()
-
     def get_unnotified(self) -> list[Job]:
         cursor = self._conn.execute(
-            "SELECT * FROM jobs WHERE notified_at IS NULL ORDER BY match_score DESC"
+            "SELECT * FROM jobs WHERE notified_at IS NULL"
         )
         return [self._row_to_job(row) for row in cursor.fetchall()]
 

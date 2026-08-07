@@ -6,6 +6,7 @@ from pathlib import Path
 def setup_logging(level: str = "INFO", file_path: str | None = None) -> None:
     logger = logging.getLogger("tracker")
     logger.setLevel(getattr(logging, level.upper(), logging.INFO))
+    logger.handlers.clear()
 
     formatter = logging.Formatter(
         "%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",

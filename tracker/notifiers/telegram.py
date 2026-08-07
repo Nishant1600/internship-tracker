@@ -1,6 +1,5 @@
 import os
 from datetime import datetime, timezone
-from typing import Optional
 
 from telegram import Bot
 from telegram.error import TelegramError
@@ -12,73 +11,133 @@ from tracker.notifiers.base import Notifier
 
 logger = get_logger()
 
+TIER_EMOJI = {
+    "easy": "🟢",
+    "medium-easy": "🟡",
+    "medium": "🟠",
+    "medium-hard": "🔴",
+    "hard": "💀",
+    "aggregator": "🔗",
+    "default": "📋",
+}
+
+TELEGRAM_MAX_LEN = 4096
+
+
+def _format_tier_header(tier: str, job_count: int) -> str:
+    emoji = TIER_EMOJI.get(tier, "📋")
+    label = tier.replace("-", " ").title()
+    return f"{emoji} {label} — {job_count} new jobs"
+
+
+def _format_job_lines(jobs: list[Job]) -> list[str]:
+    lines: list[str] = []
+    for job in jobs:
+        title = f"{job.company} — {job.title}"
+        lines.append(f"  {title}")
+        if job.url:
+            lines.append(f"  {job.url}")
+        lines.append("")
+    return lines
+
+
+def _split_message(header: str, body_lines: list[str]) -> list[str]:
+    """Split into multiple messages, each under TELEGRAM_MAX_LEN."""
+    messages: list[str] = []
+    current_lines: list[str] = []
+    current_len = len(header) + 2
+
+    for line in body_lines:
+        line_len = len(line) + 1
+        if current_len + line_len > TELEGRAM_MAX_LEN - 50:
+            messages.append(header + "\n\n" + "\n".join(current_lines))
+            header = header.split("—")[0].strip()
+            current_lines = []
+            current_len = len(header) + 2
+        current_lines.append(line)
+        current_len += line_len
+
+    if current_lines:
+        messages.append(header + "\n\n" + "\n".join(current_lines))
+
+    return messages
+
 
 def format_digest(
-    jobs: list[Job],
-    resume_score: Optional[int],
+    jobs: list[tuple[Job, str]],
     stats: dict,
-    max_jobs: int = 25,
+    max_jobs: int = 50,
 ) -> str:
     now = datetime.now(timezone.utc)
     date_str = now.strftime("%d %b %Y")
 
     lines: list[str] = []
-    lines.append(f"📅 Daily Internship Digest — {date_str}")
+    lines.append(f"Internship Digest — {date_str}")
     lines.append("")
 
-    if resume_score is not None:
-        lines.append(f"Resume Quality Score: {resume_score}/100  (from HackerRank Hiring Agent)")
+    if not jobs:
+        lines.append("No new matching internships found.")
         lines.append("")
+        lines.append(_format_summary(stats))
+        return "\n".join(lines)
 
-    displayed = jobs[:max_jobs]
-    for i, job in enumerate(displayed, 1):
-        title = f"{job.company} — {job.title}"
-        lines.append(f"{i}. {title}")
+    grouped: dict[str, list[Job]] = {}
+    for job, tier in jobs:
+        grouped.setdefault(tier, []).append(job)
 
-        location = job.location or "Location not specified"
-        score_str = f"  🎯 {job.match_score}/100" if job.match_score is not None else ""
-        lines.append(f"   📍 {location}{score_str}")
+    displayed = 0
+    tier_order = ["easy", "medium-easy", "medium", "medium-hard", "hard", "aggregator", "default"]
+    for tier in tier_order:
+        if tier not in grouped:
+            continue
+        tier_jobs = grouped[tier]
+        emoji = TIER_EMOJI.get(tier, "📋")
+        tier_label = tier.replace("-", " ").title()
+        lines.append(f"{emoji} {tier_label} ({len(tier_jobs)})")
 
-        if job.match_reasons:
-            try:
-                import json
-                reasons = json.loads(job.match_reasons)
-                if reasons and reasons != ["No skills matched"]:
-                    reasons_str = ", ".join(r.capitalize() for r in reasons[:6])
-                    lines.append(f"   ✅ Matched: {reasons_str}")
-            except (json.JSONDecodeError, TypeError):
-                pass
+        for job in tier_jobs[:max_jobs - displayed]:
+            title = f"{job.company} — {job.title}"
+            lines.append(f"  {title}")
+            if job.url:
+                lines.append(f"  {job.url}")
+            lines.append("")
+            displayed += 1
 
-        if job.url:
-            lines.append(f"   🔗 {job.url}")
+        if len(tier_jobs) > max_jobs - displayed:
+            remaining = len(tier_jobs) - (max_jobs - displayed)
+            lines.append(f"  ...and {remaining} more {tier_label} jobs")
+            lines.append("")
+            break
 
-        lines.append("")
+    lines.append(_format_summary(stats))
+    return "\n".join(lines)
 
+
+def _format_summary(stats: dict) -> str:
     total_scraped = stats.get("total_scraped", 0)
     passed_filters = stats.get("passed_filters", 0)
-    above_threshold = stats.get("above_threshold", 0)
-    new_today = stats.get("new_today", 0)
     failed = stats.get("failed", 0)
+    tiers = stats.get("tiers", [])
 
-    lines.append("─" * 40)
-    lines.append(
-        f"📊 Run summary: {total_scraped} companies scraped · {passed_filters} jobs found"
-    )
-    if above_threshold > 0:
-        lines.append(f"   → {passed_filters} passed filters · {above_threshold} above score threshold · {new_today} new today")
-    else:
-        lines.append(f"   → {passed_filters} passed filters · {new_today} new today")
+    parts = [f"{total_scraped} companies scraped", f"{passed_filters} jobs found"]
     if failed:
-        lines.append(f"   ⚠️  {failed} companies failed (see logs)")
+        parts.append(f"{failed} failed")
+    summary = " | ".join(parts)
 
-    return "\n".join(lines)
+    if tiers:
+        lines = [summary]
+        for t in tiers:
+            emoji = TIER_EMOJI.get(t["tier"], "📋")
+            lines.append(f"  {emoji} {t['tier']}: {t['jobs']}/{t['companies']} in {t['elapsed']:.0f}s")
+        return "\n".join(lines)
+    return summary
 
 
 class TelegramNotifier(Notifier):
     def __init__(self, config: TelegramConfig) -> None:
         self._config = config
-        self._bot_token: Optional[str] = None
-        self._chat_id: Optional[str] = None
+        self._bot_token: str | None = None
+        self._chat_id: str | None = None
 
     def _load_secrets(self) -> None:
         if self._bot_token is None:
@@ -86,25 +145,79 @@ class TelegramNotifier(Notifier):
         if self._chat_id is None:
             self._chat_id = os.environ.get("CHAT_ID")
 
-    async def send_digest(
-        self,
-        jobs: list[Job],
-        resume_score: Optional[int],
-        stats: dict,
-    ) -> bool:
+    def _check_config(self) -> bool:
+        self._load_secrets()
         if not self._config.enabled:
             logger.info("Telegram notifier disabled")
             return False
-
-        self._load_secrets()
         if not self._bot_token or not self._chat_id:
             logger.warning(
                 "BOT_TOKEN or CHAT_ID not set in environment. "
                 "Digest printed to log instead."
             )
-            message = format_digest(
-                jobs, resume_score, stats, self._config.max_jobs_per_digest
-            )
+            return False
+        return True
+
+    async def _send_messages(self, messages: list[str]) -> bool:
+        """Send one or more messages to Telegram, logging any that fail."""
+        if not self._check_config():
+            for msg in messages:
+                logger.info("Telegram message:\n%s", msg)
+            return False
+
+        bot = Bot(token=self._bot_token)
+        sent_any = False
+        for msg in messages:
+            if not msg.strip():
+                continue
+            try:
+                await bot.send_message(
+                    chat_id=self._chat_id,
+                    text=msg,
+                    disable_web_page_preview=True,
+                )
+                sent_any = True
+            except TelegramError as e:
+                logger.error("Failed to send Telegram message: %s", e)
+        return sent_any
+
+    async def send_tier_digest(
+        self,
+        tier_name: str,
+        jobs: list[Job],
+        tier_stats: dict,
+    ) -> bool:
+        """Send a digest for a single tier, splitting across messages if needed."""
+        if not jobs:
+            return False
+
+        header = _format_tier_header(tier_name, len(jobs))
+        body_lines = _format_job_lines(jobs)
+        summary = (
+            f"{tier_stats.get('companies', 0)} companies | "
+            f"{len(jobs)} new jobs | "
+            f"{tier_stats.get('failed', 0)} failed | "
+            f"{tier_stats.get('elapsed', 0):.0f}s"
+        )
+
+        messages = _split_message(header, body_lines)
+        if messages:
+            messages[-1] = messages[-1] + "\n\n" + summary
+
+        logger.info(
+            "Tier %s: sending %d jobs in %d message(s)",
+            tier_name, len(jobs), len(messages),
+        )
+        return await self._send_messages(messages)
+
+    async def send_digest(
+        self,
+        jobs: list[tuple[Job, str]],
+        stats: dict,
+    ) -> bool:
+        """Send the full pipeline digest, splitting across messages if needed."""
+        if not self._check_config():
+            message = format_digest(jobs, stats, self._config.max_jobs_per_digest)
             logger.info("Digest message:\n%s", message)
             return False
 
@@ -112,19 +225,32 @@ class TelegramNotifier(Notifier):
             logger.info("No jobs to notify and send_if_empty is false")
             return False
 
-        message = format_digest(
-            jobs, resume_score, stats, self._config.max_jobs_per_digest
-        )
+        now = datetime.now(timezone.utc)
+        date_str = now.strftime("%d %b %Y")
+        header = f"Internship Digest — {date_str}"
 
-        try:
-            bot = Bot(token=self._bot_token)
-            await bot.send_message(
-                chat_id=self._chat_id,
-                text=message,
-                disable_web_page_preview=True,
-            )
-            logger.info("Digest sent to Telegram (chat_id=%s)", self._chat_id)
-            return True
-        except TelegramError as e:
-            logger.error("Failed to send Telegram message: %s", e)
-            return False
+        grouped: dict[str, list[Job]] = {}
+        for job, tier in jobs:
+            grouped.setdefault(tier, []).append(job)
+
+        body_lines: list[str] = []
+        tier_order = ["easy", "medium-easy", "medium", "medium-hard", "hard", "aggregator", "default"]
+        for tier in tier_order:
+            if tier not in grouped:
+                continue
+            tier_jobs = grouped[tier]
+            emoji = TIER_EMOJI.get(tier, "📋")
+            tier_label = tier.replace("-", " ").title()
+            body_lines.append(f"{emoji} {tier_label} ({len(tier_jobs)})")
+            body_lines.extend(_format_job_lines(tier_jobs))
+
+        summary = _format_summary(stats)
+        messages = _split_message(header, body_lines)
+        if messages:
+            messages[-1] = messages[-1] + "\n\n" + summary
+
+        logger.info(
+            "Pipeline digest: %d jobs in %d message(s)",
+            len(jobs), len(messages),
+        )
+        return await self._send_messages(messages)

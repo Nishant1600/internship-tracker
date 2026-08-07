@@ -35,7 +35,7 @@ async def test_greenhouse_parses_jobs(stripe_config, scraper_config):
 
     async with respx.mock:
         respx.get(
-            "https://boards-api.greenhouse.io/v1/boards/stripe/jobs"
+            "https://api.greenhouse.io/v1/boards/stripe/jobs"
         ).respond(json=raw_data)
 
         jobs = [job async for job in scraper.fetch()]
@@ -55,7 +55,7 @@ async def test_greenhouse_handles_404(stripe_config, scraper_config):
 
     async with respx.mock:
         respx.get(
-            "https://boards-api.greenhouse.io/v1/boards/stripe/jobs"
+            "https://api.greenhouse.io/v1/boards/stripe/jobs"
         ).respond(status_code=404)
 
         jobs = [job async for job in scraper.fetch()]

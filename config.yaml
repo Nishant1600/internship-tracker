@@ -10,7 +10,7 @@ logging:
   file: "./logs/tracker.log"
 
 scraper:
-  timeout_seconds: 15
+  timeout_seconds: 30
   retry_count: 3
   retry_backoff_seconds: 5
   headless: true
@@ -24,8 +24,9 @@ filters:
       - "winter intern"
       - "research intern"
       - "co-op"
-      - "new grad"
-      - "new graduate"
+      - "virtual"
+      - "challenge"
+      - "fellowship"
     exclude:
       - "senior"
       - "lead"
@@ -34,6 +35,11 @@ filters:
       - "staff"
       - "principal"
       - "full-time only"
+      - "new grad"
+      - "new graduate"
+      - "phd"
+      - "ph.d"
+      - "doctoral"
   title_keywords:
     include:
       - "software engineer"
@@ -52,17 +58,21 @@ filters:
     exclude: []
   locations:
     include:
-      - "india"
-      - "bangalore"
-      - "hyderabad"
-      - "pune"
-      - "delhi"
-      - "mumbai"
-      - "gurugram"
-      - "gurgaon"
-      - "noida"
-      - "chennai"
-      - "remote"
+      - "India"
+      - "Bangalore"
+      - "Bengaluru"
+      - "Hyderabad"
+      - "Mumbai"
+      - "Pune"
+      - "Chennai"
+      - "Gurgaon"
+      - "Gurugram"
+      - "Noida"
+      - "Delhi"
+      - "Remote"
+      - "Anywhere"
+      - "Global"
+      - "Hybrid"
     exclude:
       - "us only"
       - "eu only"
@@ -80,17 +90,6 @@ filters:
     - 2029
     - null
   max_posting_age_days: 30
-  minimum_match_score: 0
-
-hiring_agent:
-  enabled: true
-  repo_path: "../hiring-agent-main"
-  python_path: "../hiring-agent-main/.venv/bin/python"
-  resume_path: "./data/resume.pdf"
-  rerun_on_resume_change: false
-  cache_dir: "./data/hiring_agent_cache"
-  llm_backend: "ollama"
-  ollama_base_url: "http://localhost:11434"
 
 telegram:
   enabled: true
@@ -98,7 +97,6 @@ telegram:
   send_if_empty: false
 
 features:
-  hiring_agent_scoring: true
   dedup_notifications: true
   track_seen_only: false
 
@@ -120,350 +118,288 @@ aggregator_feeds:
       batch_years: [2027, 2028, 2029]
 
 companies:
-  # ── Tier: Easy — IT / Services ──────────────────────────────────────────────
-  - {name: "TCS", ats: "html", url: "https://www.tcs.com/careers", css_selector: "div.job-listing"}
-  - {name: "Infosys", ats: "html", url: "https://www.infosys.com/careers", css_selector: "div.job-listing"}
-  - {name: "Wipro", ats: "html", url: "https://careers.wipro.com", css_selector: "div.job-listing"}
-  - {name: "HCL", ats: "html", url: "https://www.hcltech.com/careers", css_selector: "div.job-listing"}
-  - {name: "Cognizant", ats: "html", url: "https://careers.cognizant.com", css_selector: "div.job-listing"}
-  - {name: "Capgemini", ats: "html", url: "https://www.capgemini.com/careers", css_selector: "div.job-listing"}
-  - {name: "Tech Mahindra", ats: "html", url: "https://careers.techmahindra.com", css_selector: "div.job-listing"}
-  - {name: "Accenture", ats: "html", url: "https://www.accenture.com/in-en/careers", css_selector: "div.job-listing"}
-  - {name: "LTIMindtree", ats: "html", url: "https://www.ltimindtree.com/careers", css_selector: "div.job-listing"}
-  - {name: "Coforge", ats: "html", url: "https://www.coforge.com/careers", css_selector: "div.job-listing"}
-  - {name: "Persistent Systems", ats: "html", url: "https://www.persistent.com/careers", css_selector: "div.job-listing"}
-  - {name: "Publicis Sapient", ats: "html", url: "https://www.publicissapient.com/careers", css_selector: "div.job-listing"}
-  - {name: "Deloitte", ats: "html", url: "https://careers.deloitte.com", css_selector: "div.job-listing"}
-  - {name: "EY", ats: "html", url: "https://www.ey.com/en_in/careers", css_selector: "div.job-listing"}
-  - {name: "PwC", ats: "html", url: "https://www.pwc.com/careers", css_selector: "div.job-listing"}
-  - {name: "Genpact", ats: "html", url: "https://www.genpact.com/careers", css_selector: "div.job-listing"}
-  - {name: "DXC Technology", ats: "html", url: "https://careers.dxc.com", css_selector: "div.job-listing"}
-  - {name: "EPAM Systems", ats: "html", url: "https://www.epam.com/careers", css_selector: "div.job-listing"}
-  - {name: "Nagarro", ats: "html", url: "https://www.nagarro.com/careers", css_selector: "div.job-listing"}
-  - {name: "Mountblue", ats: "html", url: "https://mountblue.io/careers", css_selector: "div.job-listing"}
-  - {name: "Devsinc", ats: "html", url: "https://devsinc.com/careers", css_selector: "div.job-listing"}
-  - {name: "ConsultAdd", ats: "html", url: "https://consultadd.com/careers", css_selector: "div.job-listing"}
-  - {name: "FPT", ats: "html", url: "https://www.fpt-software.com/careers", css_selector: "div.job-listing"}
-  - {name: "QBurst", ats: "html", url: "https://www.qburst.com/careers", css_selector: "div.job-listing"}
-  - {name: "CEDCOSS", ats: "html", url: "https://cedcoss.com/careers", css_selector: "div.job-listing"}
-  - {name: "CTC", ats: "html", url: "https://www.careertechnologies.in/careers", css_selector: "div.job-listing"}
-  - {name: "Altimetrik", ats: "html", url: "https://www.altimetrik.com/careers", css_selector: "div.job-listing"}
-  - {name: "Virtusa", ats: "html", url: "https://www.virtusa.com/careers", css_selector: "div.job-listing"}
-  - {name: "Mitsogo", ats: "html", url: "https://www.mitsogo.com/careers", css_selector: "div.job-listing"}
+  easy:
+    - {name: "TCS", ats: "tcs", url: "https://ibegin.tcsapps.com/candidate/jobs/search"}
+    - {name: "Wipro", ats: "custom-portal", url: "https://careers.wipro.com/search/"}
+    - {name: "HCL", ats: "successfactors", url: "https://careers.hcltech.com/go/NonTPDemand/9558355/"}
+    - {name: "Cognizant", ats: "phenompeople", url: "https://careers.cognizant.com/india-en/jobs/"}
+    - {name: "Tech Mahindra", ats: "custom-portal", url: "https://careers.techmahindra.com/"}
+    - {name: "Accenture", ats: "custom-portal", url: "https://www.accenture.com/in-en/careers/jobsearch"}
+    - {name: "LTIMindtree", ats: "successfactors", url: "https://careers.ltimindtree.com/search/"}
+    - {name: "Deloitte", ats: "successfactors", url: "https://southasiacareers.deloitte.com/go/Deloitte-India/718244/"}
+    - {name: "EY", ats: "successfactors", url: "https://careers.ey.com/ey/search/?q=&sortColumn=referencedate&sortDirection=desc"}
+    - {name: "PwC", ats: "workday", url: "https://pwc.wd3.myworkdayjobs.com/en-US/Global_Experienced_Careers?locations=e57e6863118d0192617a4988342ba4c7&locations=e57e6863118d01cf86b0d379342bfab4&locations=4286c2c7092210052a2351a32a610000&locations=e57e6863118d01c0b8b9ff87342b40c7&locations=e57e6863118d01e1230f4288342b9ac7&locations=e57e6863118d0101d840b17a342b30b6&locations=e57e6863118d011ca7026188342bbdc7&locations=e57e6863118d01def7f26488342bc2c7&locations=4b594efa2b6c01cfc90002b5270301c1&locations=940aeee8122c10252fa9c85157880000&locations=3761ae88335410044688ff7c6b3a0000&locations=6fedfc4a010d10044688ee900a7c0000&locations=e57e6863118d011c2d21d779342bffb4&locations=351cca8db89f101a78acb2ea6c5f0000&locations=1253f47a256c101dc7c54d7832430000&locations=654a31e587e4016effd02a459109a45e&locations=e57e6863118d01b854445d88342bb8c7&locations=e57e6863118d01be5ed2aa7a342b26b6&locations=480ed971333f01ac180c364b7b21c8de&locations=d3d4fd4264d2101d8cfff7a82dbe0000&locations=e57e6863118d013a81f1f387342b31c7&locations=e57e6863118d0159272aef87342b2cc7&locations=f4872aacb3ee012f05fd8850b22c3f40&locations=e57e6863118d0143538d8d89342b5dc9&locations=e57e6863118d013f3b2da177342bcbb1&locations=393a0869abd710143a2beaf60b670000&locations=e57e6863118d01c26419ae7a342b2bb6&locations=606b09f912311013e7b7a6099f390000&locations=a0186028715c01af7a61e2a26c4feaea&locations=e57e6863118d01c9b91fc587342becc6&locations=e57e6863118d01c410d0a777342bd5b1&locations=e57e6863118d0160ef6ca477342bd0b1&jobFamilyGroup=e57e6863118d013fefc98f45202b3268&jobFamilyGroup=ddb55b48949a101442808313d3b50000&jobFamilyGroup=e57e6863118d01cbe567ba45202b4868&jobFamilyGroup=fcc2b0980c4d1014427ed0de08fe0000&jobFamilyGroup=83dadf5ea2a310144280a2bc558e0000&jobFamilyGroup=e57e6863118d01f55f7ac146202bd268&jobFamilyGroup=b38cfc0f829110144280fa7cb7390000&jobFamilyGroup=e57e6863118d01c19fd3a246202bc268&jobFamilyGroup=e57e6863118d011b6b3b9f46202bc068&jobFamilyGroup=e57e6863118d015bf85e9746202bbc68&jobFamilyGroup=e57e6863118d01deb68d8746202bb468&jobFamilyGroup=04badc06c37d10144281912ba28d0000&jobFamilyGroup=0a2ccbf2ea4f10144282135872450000&jobFamilyGroup=e57e6863118d01f05fba5646202b9a68&jobFamilyGroup=e57e6863118d015d81424046202b8e68&jobFamilyGroup=e57e6863118d014b76cf0946202b7268&jobFamilyGroup=e57e6863118d01d369ceea45202b6268&jobFamilyGroup=4a582d47bc181014427f60f9cf010000&jobFamilyGroup=e57e6863118d0128b509be45202b4a68"}
+    - {name: "DXC Technology", ats: "custom-portal", url: "https://careers.dxc.com/job-search-results/"}
+    - {name: "Mountblue", ats: "custom-portal", url: "https://careers.mountblue.io/trainee/"}
+    - {name: "FPT", ats: "custom-portal", url: "https://career.fpt-software.com/jobs-search"}
+    - {name: "QBurst", ats: "qburst", url: "https://www.qburst.com/en-in/company/career/openings/"}
+    - {name: "CEDCOSS", ats: "html", url: "https://cedcoss.com/careers/", css_selector: "a.group"}
+    - {name: "Altimetrik", ats: "custom-portal", url: "https://altimetrik.ripplehire.com/candidate/?token=SWCslMw2ct8eSm7LyqVb&source=CAREERSITE#list"}
+    - {name: "Virtusa", ats: "html", url: "https://virtusa.taleo.net/careersection/ex/jobsearch.ftl", css_selector: "tr.even, tr.odd"}
+    - {name: "Mitsogo", ats: "custom-portal", url: "https://careers.mitsogo.com/"}
 
-  # ── Tier: Medium-Easy — Indian Startups & Mid-tier ──────────────────────────
-  - {name: "Flipkart", ats: "lever", url: "https://api.lever.co/v0/postings/flipkart?mode=json"}
-  - {name: "Meesho", ats: "lever", url: "https://api.lever.co/v0/postings/meesho?mode=json"}
-  - {name: "Swiggy", ats: "lever", url: "https://api.lever.co/v0/postings/swiggy?mode=json"}
-  - {name: "Zomato", ats: "lever", url: "https://api.lever.co/v0/postings/zomato?mode=json"}
-  - {name: "PhonePe", ats: "lever", url: "https://api.lever.co/v0/postings/phonepe?mode=json"}
-  - {name: "CRED", ats: "lever", url: "https://api.lever.co/v0/postings/cred?mode=json"}
-  - {name: "Dream11", ats: "html", url: "https://www.dream11.com/careers", css_selector: "div.job-listing"}
-  - {name: "Razorpay", ats: "lever", url: "https://api.lever.co/v0/postings/razorpay?mode=json"}
-  - {name: "Nykaa", ats: "html", url: "https://www.nykaa.com/careers", css_selector: "div.job-listing"}
-  - {name: "Zepto", ats: "lever", url: "https://api.lever.co/v0/postings/zepto?mode=json"}
-  - {name: "Blinkit", ats: "html", url: "https://blinkit.com/careers", css_selector: "div.job-listing"}
-  - {name: "Paytm", ats: "html", url: "https://paytm.com/careers", css_selector: "div.job-listing"}
-  - {name: "OYO", ats: "html", url: "https://www.oyorooms.com/careers", css_selector: "div.job-listing"}
-  - {name: "MakeMyTrip", ats: "html", url: "https://www.makemytrip.com/careers", css_selector: "div.job-listing"}
-  - {name: "ShareChat", ats: "html", url: "https://sharechat.com/careers", css_selector: "div.job-listing"}
-  - {name: "Urban Company", ats: "html", url: "https://careers.urbancompany.com", css_selector: "div.job-listing"}
-  - {name: "Dunzo", ats: "html", url: "https://www.dunzo.com/careers", css_selector: "div.job-listing"}
-  - {name: "CureFit", ats: "html", url: "https://www.curefit.com/careers", css_selector: "div.job-listing"}
-  - {name: "Lenskart", ats: "html", url: "https://www.lenskart.com/careers", css_selector: "div.job-listing"}
-  - {name: "Info Edge", ats: "html", url: "https://www.infoedge.com/careers", css_selector: "div.job-listing"}
-  - {name: "InMobi", ats: "html", url: "https://www.inmobi.com/careers", css_selector: "div.job-listing"}
-  - {name: "Hotstar", ats: "html", url: "https://www.hotstar.com/careers", css_selector: "div.job-listing"}
-  - {name: "Cleartrip", ats: "html", url: "https://www.cleartrip.com/careers", css_selector: "div.job-listing"}
-  - {name: "INDmoney", ats: "html", url: "https://indmoney.com/careers", css_selector: "div.job-listing"}
-  - {name: "Delhivery", ats: "html", url: "https://www.delhivery.com/careers", css_selector: "div.job-listing"}
-  - {name: "CARS24", ats: "html", url: "https://www.cars24.com/careers", css_selector: "div.job-listing"}
-  - {name: "NinjaCart", ats: "html", url: "https://www.ninjacart.com/careers", css_selector: "div.job-listing"}
-  - {name: "BharatPe", ats: "html", url: "https://bharatpe.com/careers", css_selector: "div.job-listing"}
-  - {name: "Cashfree", ats: "html", url: "https://www.cashfree.com/careers", css_selector: "div.job-listing"}
-  - {name: "Slice", ats: "html", url: "https://www.sliceit.com/careers", css_selector: "div.job-listing"}
-  - {name: "WinZO", ats: "html", url: "https://winzo.com/careers", css_selector: "div.job-listing"}
-  - {name: "Gameskraft", ats: "html", url: "https://www.gameskraft.com/careers", css_selector: "div.job-listing"}
-  - {name: "Juspay", ats: "html", url: "https://www.juspay.in/careers", css_selector: "div.job-listing"}
-  - {name: "Freecharge", ats: "html", url: "https://www.freecharge.com/careers", css_selector: "div.job-listing"}
-  - {name: "Groww", ats: "lever", url: "https://api.lever.co/v0/postings/groww?mode=json"}
-  - {name: "Navi", ats: "html", url: "https://navi.com/careers", css_selector: "div.job-listing"}
-  - {name: "Airtel", ats: "html", url: "https://www.airtel.in/careers", css_selector: "div.job-listing"}
-  - {name: "Jio", ats: "html", url: "https://www.jio.com/careers", css_selector: "div.job-listing"}
-  - {name: "PayU", ats: "html", url: "https://payu.com/careers", css_selector: "div.job-listing"}
-  - {name: "Ola", ats: "html", url: "https://www.olacabs.com/careers", css_selector: "div.job-listing"}
-  - {name: "CarWale", ats: "html", url: "https://www.carwale.com/careers", css_selector: "div.job-listing"}
-  - {name: "Redbus", ats: "html", url: "https://www.redbus.com/careers", css_selector: "div.job-listing"}
-  - {name: "Zeta Suite", ats: "html", url: "https://www.zeta.tech/careers", css_selector: "div.job-listing"}
-  - {name: "Josh Technology", ats: "html", url: "https://www.joshtechnologygroup.com/careers", css_selector: "div.job-listing"}
-  - {name: "Licious", ats: "html", url: "https://www.licious.com/careers", css_selector: "div.job-listing"}
-  - {name: "Lendingkart", ats: "html", url: "https://www.lendingkart.com/careers", css_selector: "div.job-listing"}
-  - {name: "Smallcase", ats: "html", url: "https://www.smallcase.com/careers", css_selector: "div.job-listing"}
-  - {name: "Streak", ats: "html", url: "https://streak.com/careers", css_selector: "div.job-listing"}
-  - {name: "Jar", ats: "html", url: "https://www.jar.app/careers", css_selector: "div.job-listing"}
-  - {name: "Fi Money", ats: "html", url: "https://fi.money/careers", css_selector: "div.job-listing"}
+  medium-easy:
+    - {name: "Flipkart", ats: "html", url: "https://www.flipkartcareers.com/jobslist", css_selector: "div.job-card"}
+    - {name: "Meesho", ats: "lever", url: "https://api.lever.co/v0/postings/meesho?mode=json"}
+    - {name: "Swiggy", ats: "swiggy", url: "https://careers.swiggy.com/"}
+    - {name: "PhonePe", ats: "greenhouse", url: "https://job-boards.greenhouse.io/phonepe"}
+    - {name: "CRED", ats: "lever", url: "https://api.lever.co/v0/postings/cred?mode=json"}
+    - {name: "Razorpay", ats: "greenhouse", url: "https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited"}
+    - {name: "Nykaa", ats: "html", url: "https://careers.nykaa.com/", css_selector: "div.p-5 > div.w-full"}
+    - {name: "Zepto", ats: "html", url: "https://appcareer.talentrecruit.com/career-page/?sortName=zepto&departmentname=", css_selector: "div.row-one"}
+    - {name: "Paytm", ats: "lever", url: "https://api.lever.co/v0/postings/paytm?mode=json"}
+    - {name: "Urban Company", ats: "html", url: "https://careers.urbancompany.com/jobs", css_selector: "div.job.row"}
+    - {name: "CureFit", ats: "zwayam", url: "https://careers.cult.fit/cult/jobslist", company_id: "MTU0NzA=", domain: "careers.cult.fit"}
+    - {name: "Lenskart", ats: "html", url: "https://hiring.lenskart.com/lenskart-initiatives", css_selector: "a[href*='job']"}
+    - {name: "INDmoney", ats: "linkedin", url: "https://www.linkedin.com/jobs/search/?f_C=14406593&geoId=92000000&origin=COMPANY_PAGE_JOBS_CLUSTER_EXPANSION"}
+    - {name: "BharatPe", ats: "linkedin", url: "https://www.linkedin.com/jobs/search/?keywords=BharatPe&geoId=92000000"}
+    - {name: "Cashfree", ats: "kula", url: "https://www.cashfree.com/careers/", account_name: "cashfree"}
+    - {name: "Slice", ats: "html", url: "https://www.sliceit.com/careers/open-positions", css_selector: "a[href*='/careers/open-positions/']"}
+    - {name: "Juspay", ats: "html", url: "https://juspay.io/careers", css_selector: "div.rounded-\\[24px\\]"}
+    - {name: "Freecharge", ats: "html", url: "https://freecharge.ripplehire.com/candidate/?token=IoV5vvUSMKLwmaa1Suou&source=CAREERSITE#list", css_selector: "li.job"}
+    - {name: "Groww", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/groww/jobs?content=true"}
+    - {name: "Zerodha", ats: "custom-portal", url: "https://careers.zerodha.com/"}
+    - {name: "Navi", ats: "turbohire", url: "https://navi.turbohire.co", org_id: "3e818601-0baa-429c-b6f8-4b21903ae0e6"}
+    - {name: "Jio", ats: "html", url: "https://careers.jio.com/frmJobCategories.aspx", css_selector: "a[href*='job']"}
+    - {name: "PayU", ats: "payu", url: "https://careers.payu.in/PayU/go/_/514880/"}
+    - {name: "Zeta Suite", ats: "lever", url: "https://api.lever.co/v0/postings/zeta?mode=json"}
+    - {name: "Smallcase", ats: "html", url: "https://smallcase.freshteam.com/jobs", css_selector: "a[href*='/jobs/']"}
+    - {name: "Jar", ats: "html", url: "https://changejar.applytojob.com/apply/", css_selector: "a[href*='/apply/']"}
+    - {name: "Fi Money", ats: "lever", url: "https://api.lever.co/v0/postings/epifi?mode=json"}
 
-  # ── Tier: Medium — MNCs with India R&D Centers ─────────────────────────────
-  - {name: "Adobe", ats: "html", url: "https://www.adobe.com/careers", css_selector: "div.job-listing"}
-  - {name: "Intuit", ats: "html", url: "https://careers.intuit.com", css_selector: "div.job-listing"}
-  - {name: "Walmart Labs", ats: "html", url: "https://careers.walmart.com", css_selector: "div.job-listing"}
-  - {name: "Atlassian", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/atlassian/jobs?content=true"}
-  - {name: "PayPal", ats: "html", url: "https://careers.pypl.com", css_selector: "div.job-listing"}
-  - {name: "Visa", ats: "html", url: "https://www.visa.com/careers", css_selector: "div.job-listing"}
-  - {name: "Mastercard", ats: "html", url: "https://www.mastercard.com/careers", css_selector: "div.job-listing"}
-  - {name: "Salesforce", ats: "html", url: "https://www.salesforce.com/company/careers", css_selector: "div.job-listing"}
-  - {name: "SAP", ats: "html", url: "https://www.sap.com/careers", css_selector: "div.job-listing"}
-  - {name: "Oracle", ats: "html", url: "https://www.oracle.com/careers", css_selector: "div.job-listing"}
-  - {name: "IBM", ats: "html", url: "https://www.ibm.com/careers", css_selector: "div.job-listing"}
-  - {name: "Cisco", ats: "html", url: "https://www.cisco.com/c/en/us/careers.html", css_selector: "div.job-listing"}
-  - {name: "Texas Instruments", ats: "html", url: "https://careers.ti.com", css_selector: "div.job-listing"}
-  - {name: "Qualcomm", ats: "html", url: "https://www.qualcomm.com/company/careers", css_selector: "div.job-listing"}
-  - {name: "Dell", ats: "html", url: "https://www.dell.com/careers", css_selector: "div.job-listing"}
-  - {name: "NetApp", ats: "html", url: "https://www.netapp.com/careers", css_selector: "div.job-listing"}
-  - {name: "Nutanix", ats: "lever", url: "https://api.lever.co/v0/postings/nutanix?mode=json"}
-  - {name: "Honeywell", ats: "html", url: "https://www.honeywell.com/careers", css_selector: "div.job-listing"}
-  - {name: "Media.net", ats: "html", url: "https://www.media.net/careers", css_selector: "div.job-listing"}
-  - {name: "MoEngage", ats: "html", url: "https://www.moengage.com/careers", css_selector: "div.job-listing"}
-  - {name: "Sprinklr", ats: "lever", url: "https://api.lever.co/v0/postings/sprinklr?mode=json"}
-  - {name: "Darwinbox", ats: "lever", url: "https://api.lever.co/v0/postings/darwinbox?mode=json"}
-  - {name: "Morgan Stanley", ats: "html", url: "https://www.morganstanley.com/careers", css_selector: "div.job-listing"}
-  - {name: "Goldman Sachs", ats: "html", url: "https://www.goldmansachs.com/careers", css_selector: "div.job-listing"}
-  - {name: "Barclays", ats: "html", url: "https://www.barclays.com/careers", css_selector: "div.job-listing"}
-  - {name: "Deutsche Bank", ats: "html", url: "https://www.db.com/careers", css_selector: "div.job-listing"}
-  - {name: "American Express", ats: "html", url: "https://www.americanexpress.com/careers", css_selector: "div.job-listing"}
-  - {name: "HSBC", ats: "html", url: "https://www.hsbc.com/careers", css_selector: "div.job-listing"}
-  - {name: "J.P. Morgan", ats: "html", url: "https://www.jpmorgan.com/careers", css_selector: "div.job-listing"}
-  - {name: "Citigroup", ats: "html", url: "https://www.citigroup.com/careers", css_selector: "div.job-listing"}
-  - {name: "BNY Mellon", ats: "html", url: "https://www.bnymellon.com/careers", css_selector: "div.job-listing"}
-  - {name: "BlackRock", ats: "html", url: "https://www.blackrock.com/careers", css_selector: "div.job-listing"}
-  - {name: "Fidelity", ats: "html", url: "https://www.fidelity.com/careers", css_selector: "div.job-listing"}
-  - {name: "Vanguard", ats: "html", url: "https://www.vanguard.com/careers", css_selector: "div.job-listing"}
-  - {name: "RBC", ats: "html", url: "https://www.rbc.com/careers", css_selector: "div.job-listing"}
-  - {name: "UBS", ats: "html", url: "https://www.ubs.com/careers", css_selector: "div.job-listing"}
-  - {name: "Societe Generale", ats: "html", url: "https://www.societegenerale.com/careers", css_selector: "div.job-listing"}
-  - {name: "AMD", ats: "html", url: "https://www.amd.com/careers", css_selector: "div.job-listing"}
-  - {name: "Akamai", ats: "html", url: "https://www.akamai.com/careers", css_selector: "div.job-listing"}
-  - {name: "Arista Networks", ats: "html", url: "https://www.arista.com/careers", css_selector: "div.job-listing"}
-  - {name: "Juniper Networks", ats: "html", url: "https://careers.juniper.net", css_selector: "div.job-listing"}
-  - {name: "Nokia", ats: "html", url: "https://www.nokia.com/careers", css_selector: "div.job-listing"}
-  - {name: "Bosch", ats: "html", url: "https://www.bosch.com/careers", css_selector: "div.job-listing"}
-  - {name: "Siemens", ats: "html", url: "https://www.siemens.com/careers", css_selector: "div.job-listing"}
-  - {name: "Garmin", ats: "html", url: "https://www.garmin.com/careers", css_selector: "div.job-listing"}
-  - {name: "GE Digital", ats: "html", url: "https://www.ge.com/careers", css_selector: "div.job-listing"}
-  - {name: "GE Healthcare", ats: "html", url: "https://www.gehealthcare.com/careers", css_selector: "div.job-listing"}
-  - {name: "Mobileye", ats: "html", url: "https://www.mobileye.com/careers", css_selector: "div.job-listing"}
-  - {name: "Cadence", ats: "html", url: "https://www.cadence.com/careers", css_selector: "div.job-listing"}
-  - {name: "Synopsys", ats: "html", url: "https://www.synopsys.com/careers", css_selector: "div.job-listing"}
-  - {name: "KLA", ats: "html", url: "https://www.kla.com/careers", css_selector: "div.job-listing"}
-  - {name: "National Instruments", ats: "html", url: "https://www.ni.com/careers", css_selector: "div.job-listing"}
-  - {name: "MathWorks", ats: "html", url: "https://www.mathworks.com/company/jobs", css_selector: "div.job-listing"}
-  - {name: "ServiceNow", ats: "html", url: "https://www.servicenow.com/careers", css_selector: "div.job-listing"}
-  - {name: "Workday", ats: "html", url: "https://www.workday.com/careers", css_selector: "div.job-listing"}
-  - {name: "Zendesk", ats: "html", url: "https://www.zendesk.com/careers", css_selector: "div.job-listing"}
-  - {name: "HubSpot", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/hubspot/jobs?content=true"}
-  - {name: "Freshworks", ats: "lever", url: "https://api.lever.co/v0/postings/freshworks?mode=json"}
-  - {name: "Druva", ats: "lever", url: "https://api.lever.co/v0/postings/druva?mode=json"}
-  - {name: "Cohesity", ats: "lever", url: "https://api.lever.co/v0/postings/cohesity?mode=json"}
-  - {name: "Pure Storage", ats: "lever", url: "https://api.lever.co/v0/postings/purestorage?mode=json"}
-  - {name: "Commvault", ats: "lever", url: "https://api.lever.co/v0/postings/commvault?mode=json"}
-  - {name: "NetSuite", ats: "html", url: "https://www.netsuite.com/careers", css_selector: "div.job-listing"}
-  - {name: "Informatica", ats: "html", url: "https://www.informatica.com/careers", css_selector: "div.job-listing"}
-  - {name: "Cloudera", ats: "html", url: "https://www.cloudera.com/careers", css_selector: "div.job-listing"}
-  - {name: "Teradata", ats: "html", url: "https://www.teradata.com/careers", css_selector: "div.job-listing"}
-  - {name: "Veritas", ats: "html", url: "https://www.veritas.com/careers", css_selector: "div.job-listing"}
-  - {name: "Citrix", ats: "html", url: "https://www.citrix.com/careers", css_selector: "div.job-listing"}
-  - {name: "VMware", ats: "html", url: "https://www.vmware.com/careers", css_selector: "div.job-listing"}
-  - {name: "Splunk", ats: "html", url: "https://www.splunk.com/careers", css_selector: "div.job-listing"}
-  - {name: "Sumo Logic", ats: "lever", url: "https://api.lever.co/v0/postings/sumologic?mode=json"}
-  - {name: "Confluent", ats: "lever", url: "https://api.lever.co/v0/postings/confluent?mode=json"}
-  - {name: "Datadog", ats: "html", url: "https://www.datadoghq.com/careers", css_selector: "div.job-listing"}
-  - {name: "Mixpanel", ats: "lever", url: "https://api.lever.co/v0/postings/mixpanel?mode=json"}
-  - {name: "MicroStrategy", ats: "html", url: "https://www.microstrategy.com/careers", css_selector: "div.job-listing"}
-  - {name: "Qualtrics", ats: "lever", url: "https://api.lever.co/v0/postings/qualtrics?mode=json"}
-  - {name: "Smartsheet", ats: "lever", url: "https://api.lever.co/v0/postings/smartsheet?mode=json"}
-  - {name: "Asana", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/asana/jobs?content=true"}
-  - {name: "Box", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/box/jobs?content=true"}
-  - {name: "Dropbox", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/dropbox/jobs?content=true"}
-  - {name: "DocuSign", ats: "html", url: "https://www.docusign.com/careers", css_selector: "div.job-listing"}
-  - {name: "Squarespace", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/squarespace/jobs?content=true"}
-  - {name: "Wix", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/wix/jobs?content=true"}
-  - {name: "GoDaddy", ats: "html", url: "https://careers.godaddy.com", css_selector: "div.job-listing"}
-  - {name: "Booking.com", ats: "lever", url: "https://api.lever.co/v0/postings/bookingcom?mode=json"}
-  - {name: "Expedia", ats: "lever", url: "https://api.lever.co/v0/postings/expedia?mode=json"}
-  - {name: "Tripadvisor", ats: "lever", url: "https://api.lever.co/v0/postings/tripadvisor?mode=json"}
-  - {name: "Airbnb", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/airbnb/jobs?content=true"}
-  - {name: "Agoda", ats: "lever", url: "https://api.lever.co/v0/postings/agoda?mode=json"}
-  - {name: "Deliveroo", ats: "lever", url: "https://api.lever.co/v0/postings/deliveroo?mode=json"}
-  - {name: "Grubhub", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/grubhub/jobs?content=true"}
-  - {name: "DoorDash", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/doordash/jobs?content=true"}
-  - {name: "Chewy", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/chewy/jobs?content=true"}
-  - {name: "Nordstrom", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/nordstrom/jobs?content=true"}
-  - {name: "Target", ats: "html", url: "https://www.target.com/careers", css_selector: "div.job-listing"}
-  - {name: "Wayfair", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/wayfair/jobs?content=true"}
-  - {name: "Lowe's", ats: "html", url: "https://www.lowes.com/careers", css_selector: "div.job-listing"}
-  - {name: "Fastenal", ats: "html", url: "https://www.fastenal.com/careers", css_selector: "div.job-listing"}
-  - {name: "Hertz", ats: "html", url: "https://www.hertz.com/careers", css_selector: "div.job-listing"}
-  - {name: "Epic Systems", ats: "html", url: "https://www.epic.com/careers", css_selector: "div.job-listing"}
-  - {name: "athenahealth", ats: "html", url: "https://www.athenahealth.com/careers", css_selector: "div.job-listing"}
-  - {name: "Roche", ats: "html", url: "https://www.roche.com/careers", css_selector: "div.job-listing"}
-  - {name: "Verily", ats: "html", url: "https://verily.com/careers", css_selector: "div.job-listing"}
-  - {name: "McKesson", ats: "html", url: "https://www.mckesson.com/careers", css_selector: "div.job-listing"}
-  - {name: "Geico", ats: "html", url: "https://www.geico.com/careers", css_selector: "div.job-listing"}
-  - {name: "Aon", ats: "html", url: "https://www.aon.com/careers", css_selector: "div.job-listing"}
-  - {name: "USAA", ats: "html", url: "https://www.usaa.com/careers", css_selector: "div.job-listing"}
-  - {name: "Wells Fargo", ats: "html", url: "https://www.wellsfargo.com/careers", css_selector: "div.job-listing"}
-  - {name: "Bank of America", ats: "html", url: "https://www.bankofamerica.com/careers", css_selector: "div.job-listing"}
-  - {name: "Thomson Reuters", ats: "html", url: "https://www.thomsonreuters.com/careers", css_selector: "div.job-listing"}
-  - {name: "Nielsen", ats: "html", url: "https://www.nielsen.com/careers", css_selector: "div.job-listing"}
-  - {name: "FactSet", ats: "html", url: "https://www.factset.com/careers", css_selector: "div.job-listing"}
-  - {name: "MSCI", ats: "html", url: "https://www.msci.com/careers", css_selector: "div.job-listing"}
-  - {name: "Morningstar", ats: "html", url: "https://www.morningstar.com/careers", css_selector: "div.job-listing"}
-  - {name: "Rakuten", ats: "html", url: "https://www.rakuten.com/careers", css_selector: "div.job-listing"}
-  - {name: "Sony", ats: "html", url: "https://www.sony.com/careers", css_selector: "div.job-listing"}
-  - {name: "Samsung", ats: "html", url: "https://www.samsung.com/in/careers", css_selector: "div.job-listing"}
-  - {name: "Huawei", ats: "html", url: "https://www.huawei.com/careers", css_selector: "div.job-listing"}
-  - {name: "Ericsson", ats: "html", url: "https://www.ericsson.com/careers", css_selector: "div.job-listing"}
-  - {name: "Canonical", ats: "html", url: "https://www.canonical.com/careers", css_selector: "div.job-listing"}
-  - {name: "Luxoft", ats: "html", url: "https://www.luxoft.com/careers", css_selector: "div.job-listing"}
-  - {name: "ThoughtWorks", ats: "html", url: "https://www.thoughtworks.com/careers", css_selector: "div.job-listing"}
-  - {name: "HashedIn", ats: "html", url: "https://www.hashedin.com/careers", css_selector: "div.job-listing"}
-  - {name: "Tiger Analytics", ats: "html", url: "https://www.tigeranalytics.com/careers", css_selector: "div.job-listing"}
-  - {name: "Sigmoid", ats: "html", url: "https://www.sigmoid.com/careers", css_selector: "div.job-listing"}
-  - {name: "ZS Associates", ats: "html", url: "https://www.zs.com/careers", css_selector: "div.job-listing"}
-  - {name: "Atlan", ats: "lever", url: "https://api.lever.co/v0/postings/atlan?mode=json"}
-  - {name: "QuantGlobal", ats: "html", url: "https://www.quantglobal.com/careers", css_selector: "div.job-listing"}
+  medium-1:
+    - {name: "Adobe", ats: "workday", url: "https://adobe.wd5.myworkdayjobs.com/external_experienced?locationCountry=c4f78be1a8f14da0ab49ce1162348a5e"}
+    - {name: "Intuit", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/Intuit2/postings"}
+    - {name: "Walmart Labs", ats: "walmart", url: "https://indiacareers.walmartlabs.com/content/globaltechindia/en_in/results.html"}
+    - {name: "Atlassian", ats: "atlassian", url: "https://join.atlassian.com/api/jobs"}
+    - {name: "PayPal", ats: "eightfold", url: "https://paypal.eightfold.ai/careers?domain=paypal.com&location=India"}
+    - {name: "Visa", ats: "workday", url: "https://visa.wd5.myworkdayjobs.com/Visa?locationCountry=c4f78be1a8f14da0ab49ce1162348a5e"}
+    - {name: "Mastercard", ats: "workday", url: "https://mastercard.wd1.myworkdayjobs.com/CorporateCareers?locations=85a5bdf4e1831035984400a2fb698c94&locations=8eab563831bf10acbc722e4859721571&locations=28905a74db1b10019f5bb16c36030000&locations=8eab563831bf10acb97b7fba5feff76e&locations=2e83df2db0851073b1d3be60012912d5&locations=8eab563831bf10acb9d6f1103d78fa67"}
+    - {name: "Salesforce", ats: "workday", url: "https://salesforce.wd12.myworkdayjobs.com/External_Career_Site?locations=2c2bf80869591012453ab08dba870000&locations=8ef61f627eb01012453a9ce004d20000&locations=1038e944b11010124539eb4950f50000&locations=1038e944b1101012453a0fff44b80000&locations=1038e944b1101012453f5b10dc370000"}
+    - {name: "SAP", ats: "sap", url: "https://jobs.sap.com"}
+    - {name: "Oracle", ats: "oracle", url: "https://careers.oracle.com/en/sites/jobsearch/jobs?mode=location"}
+    - {name: "IBM", ats: "ibm", url: "https://www.ibm.com/careers/search?location=India"}
+    - {name: "Cisco", ats: "cisco", url: "https://careers.cisco.com/global/en/search-results"}
+    - {name: "Texas Instruments", ats: "texasinstruments", url: "https://careers.ti.com/en/sites/CX/jobs"}
+    - {name: "Qualcomm", ats: "qualcomm", url: "https://careers.qualcomm.com/careers"}
+    - {name: "Dell", ats: "dell", url: "https://iawmqy.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/careers/jobs"}
+    - {name: "NetApp", ats: "netapp", url: "https://careers.netapp.com/search-jobs/India/27600"}
+    - {name: "Nutanix", ats: "nutanix", url: "https://careers.nutanix.com/en/jobs/"}
+    - {name: "Honeywell", ats: "honeywell", url: "https://ibqbjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/Honeywell/jobs?location=India&locationId=300000000469485&locationLevel=country&mode=location"}
+    - {name: "Media.net", ats: "html", url: "https://careers.media.net/", css_selector: "div.job-card, div.position-item"}
+    - {name: "MoEngage", ats: "moengage", url: "https://moengage.hire.trakstar.com/"}
+    - {name: "Sprinklr", ats: "workday", url: "https://sprinklr.wd1.myworkdayjobs.com/careers?locationCountry=c4f78be1a8f14da0ab49ce1162348a5e"}
+    - {name: "Morgan Stanley", ats: "morganstanley", url: "https://morganstanley.eightfold.ai/careers?query=&location=India"}
+    - {name: "Goldman Sachs", ats: "goldmansachs", url: "https://higher.gs.com/results?sort=RELEVANCE"}
+    - {name: "Barclays", ats: "workday", url: "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays?locations=112c0542820110016377c02c6ef00000&locations=112c0542820110016377af553b050000&locations=1ab48a98eb7c1001634cf23b210c0000&locations=1ab48a98eb7c100163423aff71b80000&locations=b8f75d1cb9781000cd91027a85e30000&locations=253dfca5ccfc10016b1361f46cfe0000&locations=112c0542820110016378a0a3e68d0000&locations=112c05428201100163788a5627320000&locations=1110a9ca6540100196e1f0c315e90000"}
+    - {name: "Deutsche Bank", ats: "workday", url: "https://db.wd3.myworkdayjobs.com/DBWebsite?Country=c4f78be1a8f14da0ab49ce1162348a5e"}
+    - {name: "American Express", ats: "americanexpress", url: "https://careers.americanexpress.com/en/sites/CX_1/jobs?location=India&locationId=300000000228786&locationLevel=country&mode=location"}
+    - {name: "HSBC", ats: "hsbc", url: "https://portal.careers.hsbc.com/careers?location=India"}
+    - {name: "J.P. Morgan", ats: "jpmorgan", url: "https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/requisitions?location=India"}
+    - {name: "Citigroup", ats: "workday", url: "https://citi.wd5.myworkdayjobs.com/en-US/2?Country_and_Jurisdiction=c4f78be1a8f14da0ab49ce1162348a5e"}
+    - {name: "BNY Mellon", ats: "bnymellon", url: "https://eofe.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/BNY-Careers/jobs?location=India&locationId=300000000228786&locationLevel=country"}
+    - {name: "BlackRock", ats: "workday", url: "https://blackrock.wd1.myworkdayjobs.com/BlackRock_Professional?locations=131d7f8fcf9f014033ba3257f75037cd&locations=131d7f8fcf9f01c37cbb7257f7507dcd&locations=131d7f8fcf9f0108d331d757f750f5cd"}
+    - {name: "Fidelity", ats: "workday", url: "https://fil.wd3.myworkdayjobs.com/001?locationCountry=c4f78be1a8f14da0ab49ce1162348a5e"}
+    - {name: "Vanguard", ats: "workday", url: "https://vanguard.wd5.myworkdayjobs.com/vanguard_external?locations=f08899aeb8ba10015e1ef5090d4f0000"}
+    - {name: "UBS", ats: "talentlink", url: "https://jobs.ubs.com/TGnewUI/Search/home/Home?partnerid=25008&siteid=5012&PageType=searchResults&SearchType=linkquery&LinkID=6557"}
+    - {name: "Societe Generale", ats: "custom-portal", url: "https://careers.societegenerale.com/"}
+    - {name: "AMD", ats: "amd", url: "https://careers.amd.com/careers-home/jobs"}
+    - {name: "Akamai", ats: "oracle", url: "https://jobs.akamai.com/en/sites/CX_1/jobs?mode=location"}
+    - {name: "Arista Networks", ats: "arista", url: "https://www.arista.com/en/careers"}
+    - {name: "Juniper Networks", ats: "hpe", url: "https://careers.hpe.com/us/en/search-results?keywords=Juniper"}
+    - {name: "Nokia", ats: "oracle", url: "https://jobs.nokia.com/en/sites/CX_1/jobs?location=India&locationLevel=country&mode=location"}
+    - {name: "Bosch", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings"}
+    - {name: "Siemens", ats: "custom-portal", url: "https://jobs.siemens.com"}
+    - {name: "GE Healthcare", ats: "html", url: "https://careers.gehealthcare.com/global/en/india-jobs-digital-tech-it", css_selector: "a[href*='job']"}
+    - {name: "Mobileye", ats: "custom-portal", url: "https://careers.mobileye.com/jobs"}
+    - {name: "Cadence", ats: "workday", url: "https://cadence.wd1.myworkdayjobs.com/External_Careers?locations=4a80e4a6e96c1000db1fec5d8aec0000&locations=b98fe865fec0100120cf435c0b040000&locations=6418637d4d5010bf8a99bda155db6142&locations=c10058de6796414ca38870b90f7e4e3d&locations=6418637d4d5010bf8a99b21035266138&locations=6418637d4d5010bf8a99b84a103c613d&locations=6418637d4d5010bf8a99a4926e59612e&locations=84b6cfd69db310b0db9d79bf33759a36&locations=6418637d4d5010bf8a99abd03be56133"}
+    - {name: "Synopsys", ats: "custom-portal", url: "https://careers.synopsys.com/search-jobs"}
+    - {name: "KLA", ats: "workday", url: "https://kla.wd1.myworkdayjobs.com/Search?Country=c4f78be1a8f14da0ab49ce1162348a5e"}
+    - {name: "ServiceNow", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/servicenow/postings"}
+    - {name: "Workday", ats: "workday", url: "https://workday.wd5.myworkdayjobs.com/Workday?locations=7ecbc1538793012027ee42c91e96aee6&locations=91e43cc2ca1a01d1a4aa05e58d0e252b&locations=6052d74f129510015da0e00b75760000"}
+    - {name: "Zendesk", ats: "custom-portal", url: "https://www.zendesk.com/in/company/careers/"}
+    - {name: "HubSpot", ats: "custom-portal", url: "https://www.hubspot.com/careers/jobs"}
 
-  # ── Tier: Medium-Hard — Big Tech India Offices ──────────────────────────────
-  - {name: "Google", ats: "html", url: "https://careers.google.com/jobs/results/", css_selector: "div.job-listing"}
-  - {name: "Microsoft", ats: "html", url: "https://careers.microsoft.com/students/us/en/search-results", css_selector: "div.job-listing"}
-  - {name: "Amazon", ats: "html", url: "https://www.amazon.jobs/en/search", css_selector: "div.job-listing"}
-  - {name: "Meta", ats: "html", url: "https://www.metacareers.com/jobs", css_selector: "div.job-listing"}
-  - {name: "Apple", ats: "html", url: "https://www.apple.com/careers", css_selector: "div.job-listing"}
-  - {name: "LinkedIn", ats: "html", url: "https://www.linkedin.com/company/linkedin/careers", css_selector: "div.job-listing"}
-  - {name: "Uber", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/uber/jobs?content=true"}
-  - {name: "Grab", ats: "lever", url: "https://api.lever.co/v0/postings/grab?mode=json"}
-  - {name: "Stripe", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/stripe/jobs?content=true"}
-  - {name: "Databricks", ats: "lever", url: "https://api.lever.co/v0/postings/databricks?mode=json"}
-  - {name: "Netflix", ats: "html", url: "https://www.netflix.com/careers", css_selector: "div.job-listing"}
-  - {name: "Snowflake", ats: "lever", url: "https://api.lever.co/v0/postings/snowflake?mode=json"}
-  - {name: "Cloudflare", ats: "lever", url: "https://api.lever.co/v0/postings/cloudflare?mode=json"}
-  - {name: "CrowdStrike", ats: "lever", url: "https://api.lever.co/v0/postings/crowdstrike?mode=json"}
-  - {name: "Palo Alto Networks", ats: "lever", url: "https://api.lever.co/v0/postings/paloaltonetworks?mode=json"}
-  - {name: "Okta", ats: "lever", url: "https://api.lever.co/v0/postings/okta?mode=json"}
-  - {name: "Zscaler", ats: "lever", url: "https://api.lever.co/v0/postings/zscaler?mode=json"}
-  - {name: "Rubrik", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/rubrik/jobs?content=true"}
-  - {name: "Tanium", ats: "lever", url: "https://api.lever.co/v0/postings/tanium?mode=json"}
-  - {name: "Netskope", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/netskope/jobs?content=true"}
-  - {name: "ByteDance", ats: "html", url: "https://www.bytedance.com/careers", css_selector: "div.job-listing"}
-  - {name: "Shopify", ats: "html", url: "https://www.shopify.com/careers", css_selector: "div.job-listing"}
-  - {name: "Coinbase", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/coinbase/jobs?content=true"}
-  - {name: "Block", ats: "html", url: "https://block.xyz/careers", css_selector: "div.job-listing"}
-  - {name: "Robinhood", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/robinhood/jobs?content=true"}
-  - {name: "Affirm", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/affirm/jobs?content=true"}
-  - {name: "Brex", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/brex/jobs?content=true"}
-  - {name: "Chime", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/chime/jobs?content=true"}
-  - {name: "SoFi", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/sofi/jobs?content=true"}
-  - {name: "Rippling", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/rippling/jobs?content=true"}
-  - {name: "Gusto", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gusto/jobs?content=true"}
-  - {name: "Ripple", ats: "lever", url: "https://api.lever.co/v0/postings/ripple?mode=json"}
-  - {name: "Revolut", ats: "lever", url: "https://api.lever.co/v0/postings/revolut?mode=json"}
-  - {name: "Wise", ats: "lever", url: "https://api.lever.co/v0/postings/wise?mode=json"}
-  - {name: "Remitly", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/remitly/jobs?content=true"}
-  - {name: "Waymo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/waymo/jobs?content=true"}
-  - {name: "Cruise", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/cruise/jobs?content=true"}
-  - {name: "Aurora", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/aurora/jobs?content=true"}
-  - {name: "Rivian", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/rivian/jobs?content=true"}
-  - {name: "Nuro", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/nuro/jobs?content=true"}
-  - {name: "Pony.ai", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/ponyai/jobs?content=true"}
-  - {name: "TuSimple", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/tusimple/jobs?content=true"}
-  - {name: "Nvidia", ats: "html", url: "https://www.nvidia.com/careers", css_selector: "div.job-listing"}
-  - {name: "Anduril", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/anduril/jobs?content=true"}
-  - {name: "Palantir", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/palantir/jobs?content=true"}
-  - {name: "Scale AI", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/scaleai/jobs?content=true"}
-  - {name: "OpenAI", ats: "html", url: "https://openai.com/careers", css_selector: "div.job-listing"}
-  - {name: "Anthropic", ats: "html", url: "https://www.anthropic.com/careers", css_selector: "div.job-listing"}
-  - {name: "Duolingo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/duolingo/jobs?content=true"}
-  - {name: "Reddit", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/reddit/jobs?content=true"}
-  - {name: "Pinterest", ats: "lever", url: "https://api.lever.co/v0/postings/pinterest?mode=json"}
-  - {name: "Snap", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/snap/jobs?content=true"}
-  - {name: "Twitch", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/twitch/jobs?content=true"}
-  - {name: "Roblox", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/roblox/jobs?content=true"}
-  - {name: "Unity", ats: "html", url: "https://careers.unity.com", css_selector: "div.job-listing"}
-  - {name: "Electronic Arts", ats: "html", url: "https://www.ea.com/careers", css_selector: "div.job-listing"}
-  - {name: "Riot Games", ats: "html", url: "https://www.riotgames.com/careers", css_selector: "div.job-listing"}
-  - {name: "Niantic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/niantic/jobs?content=true"}
-  - {name: "Spotify", ats: "html", url: "https://www.spotify.com/careers", css_selector: "div.job-listing"}
-  - {name: "Instacart", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/instacart/jobs?content=true"}
-  - {name: "Lyft", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/lyft/jobs?content=true"}
-  - {name: "Toast", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/toast/jobs?content=true"}
-  - {name: "Compass", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/compass/jobs?content=true"}
-  - {name: "Opendoor", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/opendoor/jobs?content=true"}
-  - {name: "Houzz", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/houzz/jobs?content=true"}
-  - {name: "Poshmark", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/poshmark/jobs?content=true"}
-  - {name: "Faire", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/faire/jobs?content=true"}
-  - {name: "Whatnot", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/whatnot/jobs?content=true"}
-  - {name: "MongoDB", ats: "lever", url: "https://api.lever.co/v0/postings/mongodb?mode=json"}
-  - {name: "Elastic", ats: "lever", url: "https://api.lever.co/v0/postings/elastic?mode=json"}
-  - {name: "Notion", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/notion/jobs?content=true"}
-  - {name: "Miro", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/miro/jobs?content=true"}
-  - {name: "Figma", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/figma/jobs?content=true"}
-  - {name: "Loom", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/loom/jobs?content=true"}
-  - {name: "Grammarly", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/grammarly/jobs?content=true"}
-  - {name: "Otter.ai", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/otterai/jobs?content=true"}
-  - {name: "Moveworks", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/moveworks/jobs?content=true"}
-  - {name: "Harness", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/harness/jobs?content=true"}
-  - {name: "Clari", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/clari/jobs?content=true"}
-  - {name: "Braze", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/braze/jobs?content=true"}
-  - {name: "Attentive", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/attentive/jobs?content=true"}
-  - {name: "Criteo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/criteo/jobs?content=true"}
-  - {name: "PubMatic", ats: "html", url: "https://www.pubmatic.com/careers", css_selector: "div.job-listing"}
-  - {name: "The Trade Desk", ats: "html", url: "https://www.thetradedesk.com/careers", css_selector: "div.job-listing"}
-  - {name: "LiveRamp", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/liveramp/jobs?content=true"}
-  - {name: "Moloco", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/moloco/jobs?content=true"}
-  - {name: "AppDynamics", ats: "lever", url: "https://api.lever.co/v0/postings/appdynamics?mode=json"}
-  - {name: "Dynatrace", ats: "html", url: "https://www.dynatrace.com/careers", css_selector: "div.job-listing"}
-  - {name: "ThousandEyes", ats: "lever", url: "https://api.lever.co/v0/postings/thousandeyes?mode=json"}
-  - {name: "Catchpoint", ats: "html", url: "https://www.catchpoint.com/careers", css_selector: "div.job-listing"}
-  - {name: "New Relic", ats: "html", url: "https://newrelic.com/careers", css_selector: "div.job-listing"}
-  - {name: "Coupang", ats: "html", url: "https://www.coupang.com/careers", css_selector: "div.job-listing"}
-  - {name: "Mercari", ats: "html", url: "https://www.mercari.com/careers", css_selector: "div.job-listing"}
-  - {name: "Zalando", ats: "html", url: "https://www.zalando.com/careers", css_selector: "div.job-listing"}
-  - {name: "Bolt", ats: "lever", url: "https://api.lever.co/v0/postings/bolt?mode=json"}
-  - {name: "Gojek", ats: "lever", url: "https://api.lever.co/v0/postings/gojek?mode=json"}
-  - {name: "Careem", ats: "lever", url: "https://api.lever.co/v0/postings/careem?mode=json"}
-  - {name: "Airwallex", ats: "lever", url: "https://api.lever.co/v0/postings/airwallex?mode=json"}
-  - {name: "OKX", ats: "lever", url: "https://api.lever.co/v0/postings/okx?mode=json"}
-  - {name: "BitGo", ats: "html", url: "https://www.bitgo.com/careers", css_selector: "div.job-listing"}
-  - {name: "Circle", ats: "html", url: "https://www.circle.com/careers", css_selector: "div.job-listing"}
-  - {name: "Gemini", ats: "html", url: "https://www.gemini.com/careers", css_selector: "div.job-listing"}
+  medium-2:
+    - {name: "Freshworks", ats: "lever", url: "https://api.lever.co/v0/postings/freshworks?mode=json"}
+    - {name: "Druva", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/druva/jobs?content=true"}
+    - {name: "Pure Storage", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/purestorage/jobs?content=true"}
+    - {name: "Commvault", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/commvault/jobs?content=true"}
+    - {name: "NetSuite", ats: "custom-portal", url: "https://www.oracle.com/careers/opportunities/netsuite/"}
+    - {name: "Cloudera", ats: "custom-portal", url: "https://www.cloudera.com/careers"}
+    - {name: "Cohesity", ats: "html", url: "https://www.cohesity.com/careers/open-positions/", css_selector: "div[class*='card']"}
+    - {name: "Citrix", ats: "custom-portal", url: "https://careers.cloud.com/jobs/search?page=1&country_codes%5B%5D=IN&query="}
+    - {name: "VMware", ats: "smartrecruiters", url: "https://careers.smartrecruiters.com/Vmware2"}
+    - {name: "Sumo Logic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/sumologic/jobs?content=true"}
+    - {name: "Confluent", ats: "custom-portal", url: "https://www.confluent.io/careers/"}
+    - {name: "Datadog", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/datadog/jobs?content=true"}
+    - {name: "Mixpanel", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/mixpanel/jobs?content=true"}
+    - {name: "MicroStrategy", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/microstrategy/postings"}
+    - {name: "Qualtrics", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/qualtrics/jobs?content=true"}
+    - {name: "Smartsheet", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/smartsheet/jobs?content=true"}
+    - {name: "Asana", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/asana/jobs?content=true"}
+    - {name: "Box", ats: "custom-portal", url: "https://www.box.com/careers"}
+    - {name: "Dropbox", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/dropbox/jobs?content=true"}
+    - {name: "DocuSign", ats: "custom-portal", url: "https://www.docusign.com/company/careers"}
+    - {name: "Squarespace", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/squarespace/jobs?content=true"}
+    - {name: "GoDaddy", ats: "custom-portal", url: "https://careers.godaddy.com/jobs/search/india"}
+    - {name: "Booking.com", ats: "custom-portal", url: "https://careers.booking.com/"}
+    - {name: "Expedia", ats: "custom-portal", url: "https://careers.expediagroup.com/jobs/?&filter[country]=India"}
+    - {name: "Airbnb", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/airbnb/jobs?content=true"}
+    - {name: "Agoda", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/agoda/jobs?content=true"}
+    - {name: "Deliveroo", ats: "custom-portal", url: "https://careers.deliveroo.co.uk/locations/india/"}
+    - {name: "Grubhub", ats: "custom-portal", url: "https://careers.grubhub.com/"}
+    - {name: "DoorDash", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/doordashindia/jobs?content=true"}
+    - {name: "Wayfair", ats: "custom-portal", url: "https://www.aboutwayfair.com/careers"}
+    - {name: "Fastenal", ats: "custom-portal", url: "https://careers.fastenal.com/"}
+    - {name: "Epic Systems", ats: "custom-portal", url: "https://careers.epic.com/jobs/"}
+    - {name: "Verily", ats: "custom-portal", url: "https://verily.com/careers"}
+    - {name: "Wells Fargo", ats: "custom-portal", url: "https://www.wellsfargojobs.com/"}
+    - {name: "Bank of America", ats: "custom-portal", url: "https://careers.bankofamerica.com/"}
+    - {name: "Thomson Reuters", ats: "workday", url: "https://thomsonreuters.wd5.myworkdayjobs.com/en-US/External_Career_Site?locationHierarchy2=df2583de14f248e2b250d6ec510495c4&locationHierarchy2=06779b523791107c3ecfb40df14280ce&locationHierarchy2=63dc53d82e03420bb798033a1826628b"}
+    - {name: "MSCI", ats: "custom-portal", url: "https://careers.msci.com/"}
+    - {name: "Morningstar", ats: "custom-portal", url: "https://careers.morningstar.com/us/en/search-results"}
+    - {name: "Sony", ats: "linkedin", url: "https://www.linkedin.com/jobs/sony-jobs-india/"}
+    - {name: "Samsung", ats: "custom-portal", url: "https://www.samsung.com/in/about-us/careers/"}
+    - {name: "Huawei", ats: "smartrecruiters", url: "https://careers.smartrecruiters.com/HuaweiTechnologies2"}
+    - {name: "Ericsson", ats: "custom-portal", url: "https://jobs.ericsson.com/"}
+    - {name: "Canonical", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/canonical/jobs?content=true"}
+    - {name: "Luxoft", ats: "custom-portal", url: "https://career.luxoft.com/"}
+    - {name: "ThoughtWorks", ats: "custom-portal", url: "https://www.thoughtworks.com/careers/jobs"}
+    - {name: "HashedIn", ats: "custom-portal", url: "https://www.hashedin.com/careers"}
+    - {name: "Tiger Analytics", ats: "html", url: "https://www.tigeranalytics.com/about-us/current-openings/", css_selector: "div.all-jobs-list-wrap"}
+    - {name: "Sigmoid", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/sigmoid/jobs?content=true"}
+    - {name: "ZS Associates", ats: "custom-portal", url: "https://jobs.zs.com/all/jobs?country=India&page=1"}
+    - {name: "Atlan", ats: "custom-portal", url: "https://atlan.com/careers"}
 
-  # ── Tier: Hard — Quant / HFT / Finance ──────────────────────────────────────
-  - {name: "DE Shaw", ats: "html", url: "https://www.deshaw.com/careers/choose-your-path", css_selector: "div.job-listing"}
-  - {name: "Citadel", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/citadel/jobs?content=true"}
-  - {name: "Two Sigma", ats: "html", url: "https://careers.twosigma.com/careers/SearchJobs", css_selector: "div.job-listing"}
-  - {name: "Jane Street", ats: "html", url: "https://www.janestreet.com/join-jane-street/open-roles/", css_selector: "div.job-listing"}
-  - {name: "IMC", ats: "html", url: "https://imc.com/eu/careers/vacancies/", css_selector: "div.job-listing"}
-  - {name: "Optiver", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/optiver/jobs?content=true"}
-  - {name: "Hudson River Trading", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/hudsonrivertrading/jobs?content=true"}
-  - {name: "Tower Research Capital", ats: "html", url: "https://www.tower-research.com/careers", css_selector: "div.job-listing"}
-  - {name: "Virtu Financial", ats: "html", url: "https://www.virtu.com/careers", css_selector: "div.job-listing"}
-  - {name: "Millennium", ats: "html", url: "https://www.mlp.com/careers", css_selector: "div.job-listing"}
-  - {name: "Point72", ats: "html", url: "https://www.point72.com/careers", css_selector: "div.job-listing"}
-  - {name: "Bridgewater Associates", ats: "html", url: "https://www.bridgewater.com/careers", css_selector: "div.job-listing"}
-  - {name: "AQR Capital", ats: "html", url: "https://www.aqr.com/careers", css_selector: "div.job-listing"}
-  - {name: "Squarepoint Capital", ats: "html", url: "https://www.squarepoint-capital.com/careers", css_selector: "div.job-listing"}
-  - {name: "DRW", ats: "html", url: "https://www.drw.com/careers", css_selector: "div.job-listing"}
-  - {name: "Jump Trading", ats: "html", url: "https://www.jumptrading.com/careers", css_selector: "div.job-listing"}
-  - {name: "GSA Capital", ats: "html", url: "https://www.gsacapital.com/careers", css_selector: "div.job-listing"}
-  - {name: "WorldQuant", ats: "html", url: "https://www.worldquant.com/career-listing/", css_selector: "div.job-listing"}
-  - {name: "Graviton Research Capital", ats: "html", url: "https://gravitontrading.com/careers", css_selector: "div.job-listing"}
-  - {name: "Futures First", ats: "html", url: "https://www.futuresfirst.com/careers", css_selector: "div.job-listing"}
-  - {name: "SIG", ats: "html", url: "https://www.sig.com/careers", css_selector: "div.job-listing"}
-  - {name: "Trexquant", ats: "html", url: "https://www.trexquant.com/careers", css_selector: "div.job-listing"}
-  - {name: "Arcesium", ats: "html", url: "https://www.arcesium.com/careers", css_selector: "div.job-listing"}
-  - {name: "PEAK6", ats: "html", url: "https://www.peak6.com/careers", css_selector: "div.job-listing"}
-  - {name: "Versor Investments", ats: "html", url: "https://www.versor-inv.com/careers", css_selector: "div.job-listing"}
-  - {name: "G-Research", ats: "html", url: "https://www.gresearch.com/careers", css_selector: "div.job-listing"}
-  - {name: "Akuna Capital", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/akunacapital/jobs?content=true"}
-  - {name: "IVP", ats: "html", url: "https://www.ivp.com/careers", css_selector: "div.job-listing"}
-  - {name: "Bloomberg", ats: "html", url: "https://www.bloomberg.com/careers", css_selector: "div.job-listing"}
+  medium-hard:
+    - {name: "Google", ats: "google", url: "https://www.google.com/about/careers/applications/jobs/results"}
+    - {name: "Microsoft", ats: "microsoft", url: "https://jobs.careers.microsoft.com/global/en/search"}
+    - {name: "Amazon", ats: "custom-api", url: "https://www.amazon.jobs/en/search.json"}
+    - {name: "Meta", ats: "meta", url: "https://www.metacareers.com/jobsearch/"}
+    - {name: "Apple", ats: "custom-portal", url: "https://jobs.apple.com/en-in/search"}
+    - {name: "LinkedIn", ats: "custom-portal", url: "https://www.linkedin.com/jobs/api/seeMoreJobPostings"}
+    - {name: "Uber", ats: "html", url: "https://jobs.uber.com/en/jobs/?radius=100&team=Engineer", css_selector: "a[href*='/en/jobs/']"}
+    - {name: "Grab", ats: "html", url: "https://www.grab.careers/en/jobs/?search=&country=India&pagesize=20", css_selector: "div.card.card-job"}
+    - {name: "Stripe", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/stripe/jobs?content=true"}
+    - {name: "Databricks", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/databricks/jobs?content=true"}
+    - {name: "Netflix", ats: "netflix", url: "https://explore.jobs.netflix.net/careers"}
+    - {name: "Snowflake", ats: "custom-portal", url: "https://careers.snowflake.com/us/en/search-results"}
+    - {name: "Cloudflare", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/cloudflare/jobs?content=true"}
+    - {name: "CrowdStrike", ats: "workday", url: "https://crowdstrike.wd5.myworkdayjobs.com/en-GB/crowdstrikecareers?locationCountry=c4f78be1a8f14da0ab49ce1162348a5e"}
+    - {name: "Palo Alto Networks", ats: "custom-portal", url: "https://jobs.paloaltonetworks.com/en/search-jobs"}
+    - {name: "Okta", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/okta/jobs?content=true"}
+    - {name: "Zscaler", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/zscaler/jobs?content=true"}
+    - {name: "Rubrik", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/rubrik/jobs?content=true"}
+    - {name: "Tanium", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/tanium/jobs?content=true"}
+    - {name: "Netskope", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/netskope/jobs?content=true"}
+    - {name: "ByteDance", ats: "custom-portal", url: "https://jobs.bytedance.com/api/v1/search/job/posts"}
+    - {name: "Coinbase", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/coinbase/jobs?content=true"}
+    - {name: "Block", ats: "block", url: "https://block.xyz/careers/jobs"}
+    - {name: "Robinhood", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/robinhood/jobs?content=true"}
+    - {name: "Affirm", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/affirm/jobs?content=true"}
+    - {name: "Brex", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/brex/jobs?content=true"}
+    - {name: "Chime", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/chime/jobs?content=true"}
+    - {name: "SoFi", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/sofi/jobs?content=true"}
+    - {name: "Rippling", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/rippling/jobs?content=true"}
+    - {name: "Gusto", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gusto/jobs?content=true"}
+    - {name: "Ripple", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/ripple/jobs?content=true"}
+    - {name: "Revolut", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/revolut/jobs?content=true"}
+    - {name: "Wise", ats: "custom-api", url: "https://api.wise.jobs/v1/postings"}
+    - {name: "Remitly", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/remitly/jobs?content=true"}
+    - {name: "Waymo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/waymo/jobs?content=true"}
+    - {name: "Cruise", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/getcruise/jobs?content=true"}
+    - {name: "Aurora", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/aurora/jobs?content=true"}
+    - {name: "Rivian", ats: "custom-portal", url: "https://careers.rivian.com/"}
+    - {name: "Nuro", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/nuro/jobs?content=true"}
+    - {name: "Pony.ai", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/ponyai/jobs?content=true"}
+    - {name: "TuSimple", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/tusimple/jobs?content=true"}
+    - {name: "Nvidia", ats: "workday", url: "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite?locationHierarchy1=2fcb99c455831013ea52b82135ba3266"}
+    - {name: "Anduril", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/anduriltechnologies/jobs?content=true"}
+    - {name: "Palantir", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/palantir/jobs?content=true"}
+    - {name: "Scale AI", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/scaleai/jobs?content=true"}
+    - {name: "OpenAI", ats: "openai", url: "https://openai.com/careers/search/"}
+    - {name: "Anthropic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/anthropic/jobs?content=true"}
+    - {name: "Duolingo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/duolingo/jobs?content=true"}
+    - {name: "Reddit", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/reddit/jobs?content=true"}
+    - {name: "Pinterest", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/pinterest/jobs?content=true"}
+    - {name: "Snap", ats: "custom-portal", url: "https://careers.snap.com/jobs?location=Mumbai"}
+    - {name: "Twitch", ats: "custom-portal", url: "https://www.twitch.tv/jobs"}
+    - {name: "Roblox", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/roblox/jobs?content=true"}
+    - {name: "Unity", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/unity3d/jobs?content=true"}
+    - {name: "Electronic Arts", ats: "custom-api", url: "https://ea.gr8people.com/index.external.html"}
+    - {name: "Riot Games", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/riotgames/jobs?content=true"}
+    - {name: "Niantic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/niantic/jobs?content=true"}
+    - {name: "Spotify", ats: "custom-portal", url: "https://api-partner.spotify.com/pathfinder/v1/query"}
+    - {name: "Instacart", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/instacart/jobs?content=true"}
+    - {name: "Lyft", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/lyft/jobs?content=true"}
+    - {name: "Toast", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/toast/jobs?content=true"}
+    - {name: "Compass", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/compass/jobs?content=true"}
+    - {name: "Opendoor", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/opendoor/jobs?content=true"}
+    - {name: "Houzz", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/houzz/jobs?content=true"}
+    - {name: "Poshmark", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/poshmark/jobs?content=true"}
+    - {name: "Faire", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/faire/jobs?content=true"}
+    - {name: "Whatnot", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/whatnot/jobs?content=true"}
+    - {name: "MongoDB", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/mongodb/jobs?content=true"}
+    - {name: "Elastic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/elastic/jobs?content=true"}
+    - {name: "Notion", ats: "notion", url: "https://www.notion.com/careers"}
+    - {name: "Miro", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/miro/jobs?content=true"}
+    - {name: "Figma", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/figma/jobs?content=true"}
+    - {name: "Loom", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/loom/jobs?content=true"}
+    - {name: "Grammarly", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/grammarly/jobs?content=true"}
+    - {name: "Otter.ai", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/otterai/jobs?content=true"}
+    - {name: "Moveworks", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/moveworks/jobs?content=true"}
+    - {name: "Harness", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/harness/jobs?content=true"}
+    - {name: "Clari", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/clari/jobs?content=true"}
+    - {name: "Braze", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/braze/jobs?content=true"}
+    - {name: "Attentive", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/attentive/jobs?content=true"}
+    - {name: "Criteo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/criteo/jobs?content=true"}
+    - {name: "LiveRamp", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/liveramp/jobs?content=true"}
+    - {name: "Moloco", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/moloco/jobs?content=true"}
+    - {name: "AppDynamics", ats: "custom-portal", url: "https://www.appdynamics.com/company/careers"}
+    - {name: "Dynatrace", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/Dynatrace/postings"}
+    - {name: "ThousandEyes", ats: "custom-portal", url: "https://www.thousandeyes.com/careers"}
+    - {name: "Catchpoint", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/catchpoint/jobs?content=true"}
+    - {name: "New Relic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/newrelic/jobs?content=true"}
+    - {name: "Coupang", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/coupang/jobs?content=true"}
+    - {name: "Mercari", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/mercari/jobs?content=true"}
+    - {name: "Zalando", ats: "custom-portal", url: "https://jobs.zalando.com/api/jobs"}
+    - {name: "Bolt", ats: "html", url: "https://bolt.eu/en/careers/positions", css_selector: "h3"}
+    - {name: "Gojek", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gojek/jobs?content=true"}
+    - {name: "Careem", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/careem/jobs?content=true"}
+    - {name: "Airwallex", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/airwallex/jobs?content=true"}
+    - {name: "OKX", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/okx/jobs?content=true"}
+    - {name: "BitGo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/bitgo/jobs?content=true"}
+    - {name: "Circle", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/circle/jobs?content=true"}
+    - {name: "Gemini", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gemini/jobs?content=true"}
+
+  hard:
+    - {name: "DE Shaw", ats: "custom-portal", url: "https://www.deshaw.com/careers", skip_location_filter: true}
+    - {name: "Citadel", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/citadel/jobs?content=true", skip_location_filter: true}
+    - {name: "Two Sigma", ats: "custom-portal", url: "https://careers.twosigma.com/careers/OpenRoles", skip_location_filter: true}
+    - {name: "Jane Street", ats: "custom-api", url: "https://www.janestreet.com/careers/jobs.json", skip_location_filter: true}
+    - {name: "IMC", ats: "custom-portal", url: "https://careers.imc.com/api/v1/jobs", skip_location_filter: true}
+    - {name: "Optiver", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/optiver/jobs?content=true", skip_location_filter: true}
+    - {name: "Hudson River Trading", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/hudsonrivertrading/jobs?content=true", skip_location_filter: true}
+    - {name: "Tower Research Capital", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/towerresearchcapital/jobs?content=true", skip_location_filter: true}
+    - {name: "Virtu Financial", ats: "greenhouse", url: "https://job-boards.greenhouse.io/virtu", skip_location_filter: true}
+    - {name: "Millennium", ats: "custom-portal", url: "https://career.mlp.com/careers?domain=mlp.com&sort_by=relevance&pid=755936615453", skip_location_filter: true}
+    - {name: "Millennium Campus", ats: "custom-portal", url: "https://campusjobs.mlp.com/careers?domain=mlp.com&microsite=campus-site", skip_location_filter: true}
+    - {name: "Point72", ats: "custom-portal", url: "https://careers.point72.com/?location=bengaluru,%20india", skip_location_filter: true}
+    - {name: "AQR Capital", ats: "custom-portal", url: "https://careers.aqr.com/jobs/category/university-jobs?size=n_20_n", skip_location_filter: true}
+    - {name: "Squarepoint Capital", ats: "custom-portal", url: "https://www.squarepoint-capital.com/careers", skip_location_filter: true}
+    - {name: "DRW", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/drw/jobs?content=true", skip_location_filter: true}
+    - {name: "Jump Trading", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/jumptrading/jobs?content=true", skip_location_filter: true}
+    - {name: "GSA Capital", ats: "custom-portal", url: "https://www.gsacapital.com/careers", skip_location_filter: true}
+    - {name: "WorldQuant", ats: "custom-portal", url: "https://www.worldquant.com/career-listing/?location=mumbai-india&department=zz", skip_location_filter: true}
+    - {name: "Graviton Research Capital", ats: "custom-portal", url: "https://gravitontrading.com/careers/", skip_location_filter: true}
+    - {name: "Futures First", ats: "custom-portal", url: "https://futuresfirst.com/careers/", skip_location_filter: true}
+    - {name: "SIG", ats: "custom-portal", url: "https://careers.sig.com/", skip_location_filter: true}
+    - {name: "Trexquant", ats: "custom-portal", url: "https://www.trexquant.com/careers", skip_location_filter: true}
+    - {name: "Arcesium", ats: "custom-portal", url: "https://www.arcesium.com/careers/", skip_location_filter: true}
+    - {name: "PEAK6", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/peak6/jobs?content=true", skip_location_filter: true}
+    - {name: "Versor Investments", ats: "html", url: "https://www.versor-inv.com/careers", css_selector: ".position-title", skip_location_filter: true}
+    - {name: "G-Research", ats: "custom-portal", url: "https://www.gresearch.co.uk/vacancies/", skip_location_filter: true}
+    - {name: "Akuna Capital", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/akunacapital/jobs?content=true", skip_location_filter: true}
+    - {name: "IVP", ats: "custom-portal", url: "https://careers.ivp.in/", skip_location_filter: true}
+    - {name: "Bloomberg", ats: "custom-portal", url: "https://careers.bloomberg.com/job/search", skip_location_filter: true}

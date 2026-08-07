@@ -4,10 +4,9 @@ Aggregator feed parser.
 Pulls job listings from community-maintained GitHub markdown repositories
 that aggregate internship postings across many companies.
 
-Format: standard pipe-table markdown:
-    | Company | Role | Location | Application/Link | Date Posted |
-    |---------|------|----------|-----------------|-------------|
-    | Google  | SWE Intern | ... | [Apply](url) | 2 days ago |
+Format: pipe-table markdown with variable columns (5 or 6):
+    | Company | Position | Location | Link | Date |
+    | Company | Position | Location | Salary | Link | Date |
 
 Tagged as source_ats = "aggregator:<source_name>" for dedup.
 """
@@ -23,22 +22,32 @@ from tracker.logger import get_logger
 
 logger = get_logger()
 
-TABLE_ROW_RE = re.compile(
-    r"^\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*(.*?)\s*\|"
-)
 LINK_RE = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
+HTML_LINK_RE = re.compile(r'<a\s+href="([^"]+)"', re.IGNORECASE)
+HTML_TAG_RE = re.compile(r"<[^>]+>")
+DATE_RE = re.compile(
+    r"\b\d+\s*(?:days?\s*ago|hours?\s*ago|[hd])\b"
+    r"|\b(?:just\s*posted|today|yesterday)\b",
+    re.IGNORECASE,
+)
 
 
-def _extract_link(cell: str) -> tuple[str, str]:
-    """Extract text and URL from a markdown link cell."""
-    match = LINK_RE.search(cell)
-    if match:
-        return match.group(1).strip(), match.group(2).strip()
-    return cell.strip(), ""
+def _strip_html(text: str) -> str:
+    return HTML_TAG_RE.sub("", text).strip()
+
+
+def _extract_url(cell: str) -> str:
+    """Extract URL from markdown or HTML link."""
+    md = LINK_RE.search(cell)
+    if md:
+        return md.group(2).strip()
+    html = HTML_LINK_RE.search(cell)
+    if html:
+        return html.group(1).strip()
+    return ""
 
 
 def _days_ago(text: str) -> int | None:
-    """Parse 'X days ago' style text into number of days."""
     m = re.search(r"(\d+)\s*days?\s*ago", text, re.IGNORECASE)
     if m:
         return int(m.group(1))
@@ -50,6 +59,41 @@ def _days_ago(text: str) -> int | None:
     if re.search(r"\byesterday\b", text, re.IGNORECASE):
         return 1
     return None
+
+
+def _parse_row(stripped: str) -> RawJob | None:
+    """Parse a single pipe-delimited table row into a RawJob."""
+    parts = [c.strip() for c in stripped.split("|")]
+    parts = parts[1:-1] if len(parts) > 2 else parts
+    if len(parts) < 5:
+        return None
+
+    company = _strip_html(parts[0])
+    title = _strip_html(parts[1])
+    location = _strip_html(parts[2])
+
+    if len(parts) == 6:
+        salary_or_link = parts[3]
+        link_cell = parts[4]
+        date_cell = parts[5]
+        url = _extract_url(link_cell)
+        if not url:
+            url = _extract_url(salary_or_link)
+    else:
+        link_cell = parts[3]
+        date_cell = parts[4]
+        url = _extract_url(link_cell)
+
+    return RawJob(
+        company=company,
+        title=title,
+        location=location or None,
+        url=url,
+        description=None,
+        employment_type=None,
+        date_posted=None,
+        source_ats="",
+    )
 
 
 class AggregatorScraper:
@@ -75,6 +119,7 @@ class AggregatorScraper:
 
         lines = text.split("\n")
         in_table = False
+        source_tag = f"aggregator:{self._source.name}"
 
         for line in lines:
             stripped = line.strip()
@@ -84,36 +129,16 @@ class AggregatorScraper:
                 continue
 
             if not in_table or not stripped.startswith("|"):
+                if in_table and not stripped.startswith("|"):
+                    in_table = False
                 continue
 
-            match = TABLE_ROW_RE.match(stripped)
-            if not match:
+            if not stripped or DATE_RE.search(stripped.split("|")[0] if "|" in stripped else ""):
                 continue
 
-            company = match.group(1).strip()
-            role = match.group(2).strip()
-            location = match.group(3).strip()
-            link_cell = match.group(4).strip()
-            date_cell = match.group(5).strip()
+            job = _parse_row(stripped)
+            if not job:
+                continue
 
-            title, url = _extract_link(role)
-            if not title:
-                title = role
-            if not url:
-                _, url = _extract_link(link_cell)
-                if not url:
-                    _, url = _extract_link(role)
-
-            date_age = _days_ago(date_cell)
-            source_tag = f"aggregator:{self._source.name}"
-
-            yield RawJob(
-                company=company,
-                title=title,
-                location=location or None,
-                url=url,
-                description=None,
-                employment_type=None,
-                date_posted=None,
-                source_ats=source_tag,
-            )
+            job.source_ats = source_tag
+            yield job

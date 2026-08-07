@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime, timezone, timedelta
 
 from tracker.config import FiltersConfig, FilterList
 from tracker.filters import check_job_filters
@@ -32,8 +33,7 @@ def make_config(**kwargs) -> FiltersConfig:
         "locations": FilterList(include=["india", "bangalore"], exclude=[]),
         "employment_types": FilterList(include=["intern"], exclude=[]),
         "allowed_grad_years": [2027, 2028, 2029, None],
-        "max_posting_age_days": 30,
-        "minimum_match_score": 0,
+        "max_posting_age_days": 0,
     }
     defaults.update(kwargs)
     return FiltersConfig(**defaults)
@@ -118,7 +118,7 @@ class TestLocationFilter:
         cfg = make_config(locations=FilterList(include=["india", "remote"]))
         job = make_job(location="San Francisco, CA")
         ok, reasons = check_job_filters(job, cfg)
-        assert ok is True
+        assert ok is False
         assert "Location not in include list" in reasons
 
 
@@ -141,11 +141,11 @@ class TestEmploymentTypeFilter:
         ok, _ = check_job_filters(job, cfg)
         assert ok is True
 
-    def test_notes_when_type_not_in_include(self):
+    def test_rejects_when_type_not_in_include(self):
         cfg = make_config(employment_types=FilterList(include=["intern"], exclude=[]))
         job = make_job(employment_type="Contract")
         ok, reasons = check_job_filters(job, cfg)
-        assert ok is True
+        assert ok is False
         assert "Employment type not in include list" in reasons
 
 
@@ -178,7 +178,8 @@ class TestGradYearFilter:
 class TestMaxAgeFilter:
     def test_passes_recent_posting(self):
         cfg = make_config(max_posting_age_days=30)
-        job = make_job(date_posted="2026-06-15T10:00:00Z")
+        recent_date = (datetime.now(timezone.utc) - timedelta(days=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        job = make_job(date_posted=recent_date)
         ok, _ = check_job_filters(job, cfg)
         assert ok is True
 
@@ -222,7 +223,6 @@ class TestEdgeCases:
             employment_types=FilterList(include=[], exclude=[]),
             allowed_grad_years=[None],
             max_posting_age_days=0,
-            minimum_match_score=0,
         )
         job = make_job(
             title="CEO", location="Mars", employment_type="Full-Time",
@@ -239,14 +239,12 @@ class TestEdgeCases:
             employment_types=FilterList(include=["intern"], exclude=[]),
             allowed_grad_years=[2027, 2028, 2029, None],
             max_posting_age_days=30,
-            minimum_match_score=0,
         )
         job = make_job(
             title="Software Engineer Intern",
-            location="Bangalore",
+            location="Remote",
             employment_type="Contract",
         )
         ok, reasons = check_job_filters(job, cfg)
-        assert ok is True
-        assert "Location not in include list" in str(reasons)
+        assert ok is False
         assert "Employment type not in include list" in str(reasons)
