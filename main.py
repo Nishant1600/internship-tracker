@@ -30,6 +30,9 @@ def _is_playwright_scraper(scraper) -> bool:
     return getattr(mod, "PLAYWRIGHT_AVAILABLE", False)
 
 
+_COMPANY_TIMEOUT_SECONDS = 60
+
+
 async def _scrape_company(company, config, repo, logger) -> list:
     """Scrape a single company. Returns list of matched Jobs."""
     try:
@@ -41,9 +44,24 @@ async def _scrape_company(company, config, repo, logger) -> list:
     raw_jobs = []
     for attempt in range(config.scraper.retry_count):
         try:
-            async for job in scraper.fetch():
-                raw_jobs.append(job)
+            async def _fetch_all():
+                jobs = []
+                async for job in scraper.fetch():
+                    jobs.append(job)
+                return jobs
+
+            raw_jobs = await asyncio.wait_for(
+                _fetch_all(), timeout=_COMPANY_TIMEOUT_SECONDS
+            )
             break
+        except asyncio.TimeoutError:
+            logger.error("[%s] Timed out after %ds (attempt %d)", company.name, _COMPANY_TIMEOUT_SECONDS, attempt + 1)
+            if _is_playwright_scraper(scraper):
+                gc.collect()
+            if attempt == config.scraper.retry_count - 1:
+                raw_jobs = []
+                break
+            await asyncio.sleep(2)
         except (BrokenPipeError, ConnectionError, OSError) as e:
             logger.error("[%s] Playwright pipe error (attempt %d): %s", company.name, attempt + 1, e)
             gc.collect()
