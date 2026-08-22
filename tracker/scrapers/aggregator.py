@@ -12,6 +12,7 @@ Tagged as source_ats = "aggregator:<source_name>" for dedup.
 """
 
 import re
+from datetime import datetime, timedelta, timezone
 from typing import AsyncIterator
 
 import httpx
@@ -84,6 +85,14 @@ def _parse_row(stripped: str) -> RawJob | None:
         date_cell = parts[4]
         url = _extract_url(link_cell)
 
+    # Convert relative dates ("2 days ago", "yesterday") to ISO so max-age filtering works
+    days = _days_ago(_strip_html(date_cell))
+    date_posted = (
+        (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        if days is not None
+        else None
+    )
+
     return RawJob(
         company=company,
         title=title,
@@ -91,7 +100,7 @@ def _parse_row(stripped: str) -> RawJob | None:
         url=url,
         description=None,
         employment_type=None,
-        date_posted=None,
+        date_posted=date_posted,
         source_ats="",
     )
 

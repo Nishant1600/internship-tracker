@@ -201,6 +201,9 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
 
     if config.aggregator_feeds.enabled and not tier_filter:
         from tracker.scrapers.aggregator import AggregatorScraper
+        agg_filters = config.filters.model_copy(
+            update={"max_posting_age_days": config.aggregator_feeds.max_posting_age_days}
+        )
         agg_jobs = []
         for source in config.aggregator_feeds.sources:
             try:
@@ -208,7 +211,7 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
                 async for raw_job in agg.fetch():
                     if config.features.dedup_notifications and should_skip_dedup(raw_job, repo, True):
                         continue
-                    passes, _ = check_job_filters(raw_job, config.filters)
+                    passes, _ = check_job_filters(raw_job, agg_filters)
                     if not passes:
                         continue
                     db_job = repo.upsert(raw_job)

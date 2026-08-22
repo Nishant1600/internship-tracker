@@ -1,5 +1,6 @@
 import pytest
 import respx
+from datetime import datetime, timezone
 from httpx import Response
 
 from tracker.config import AggregatorSource
@@ -43,6 +44,22 @@ async def test_aggregator_parses_table(source):
     assert jobs[1].company == "Stripe"
     assert jobs[2].company == "Jane Street"
     assert jobs[3].company == "Meta"
+
+
+@pytest.mark.asyncio
+async def test_aggregator_relative_dates_become_iso(source):
+    scraper = AggregatorScraper(source)
+
+    async with respx.mock:
+        respx.get(source.url).respond(text=sample_markdown())
+        jobs = [job async for job in scraper.fetch()]
+
+    # "2 days ago" -> date_posted 2 days before now; unknown dates stay None
+    assert jobs[0].date_posted is not None
+    parsed = datetime.strptime(jobs[0].date_posted, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    assert (datetime.now(timezone.utc) - parsed).days >= 2
+    assert jobs[2].date_posted is not None  # "Just posted" -> today
+    assert jobs[3].date_posted is not None  # "Yesterday" -> 1 day ago
 
 
 @pytest.mark.asyncio
