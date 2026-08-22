@@ -148,6 +148,14 @@ class TestEmploymentTypeFilter:
         assert ok is False
         assert "Employment type not in include list" in reasons
 
+    def test_passes_when_type_unknown(self):
+        # Most ATS APIs (e.g. Greenhouse boards) omit employment type entirely;
+        # unknown must not be rejected when an include list is set.
+        cfg = make_config(employment_types=FilterList(include=["intern"], exclude=[]))
+        job = make_job(employment_type=None)
+        ok, _ = check_job_filters(job, cfg)
+        assert ok is True
+
 
 class TestGradYearFilter:
     def test_passes_allowed_year(self):

@@ -14,7 +14,7 @@ playwright install chromium
 
 # Configure
 cp .env.example .env
-# Edit .env with your BOT_TOKEN, CHAT_ID, GEMINI_API_KEY
+# Edit .env with your BOT_TOKEN and CHAT_ID
 
 # Run once
 python main.py --run-now
@@ -61,21 +61,6 @@ filters:
 2. Find your chat ID (message your bot, visit `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates`)
 3. Set `BOT_TOKEN` and `CHAT_ID` in `.env` (never in config.yaml)
 
-## HackerRank Hiring Agent
-
-The optional hiring-agent integration scores job postings against your resume.
-
-```yaml
-hiring_agent:
-  enabled: true
-  repo_path: "../hiring-agent-main"
-  python_path: "../hiring-agent-main/.venv/bin/python"
-  resume_path: "./data/resume.pdf"
-  llm_backend: "gemini"   # or "ollama"
-```
-
-The agent runs as a subprocess. If it fails, the app falls back to a hardcoded resume profile (keyword matching only).
-
 ## Running on a Schedule
 
 ### APScheduler (default daemon mode)
@@ -89,7 +74,7 @@ python main.py --daemon
 ```
 
 ### GitHub Actions
-Create `.github/workflows/daily.yml` with `schedule: [{cron: "30 2 * * *"}]` and secrets for `BOT_TOKEN`, `CHAT_ID`.
+`.github/workflows/internship-tracker.yml` runs tests then the pipeline every other day (06:00 IST) via `schedule`, with `BOT_TOKEN` and `CHAT_ID` repo secrets. The SQLite DB in `data/` is persisted between runs via the actions cache, so dedup works across runs. Trigger manually with `workflow_dispatch`.
 
 ## Project Structure
 

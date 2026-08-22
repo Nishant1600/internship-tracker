@@ -2,11 +2,15 @@ name: Internship Tracker
 
 on:
   schedule:
-    - cron: "0 2 */2 * *"
+    - cron: "30 0 1-31/2 * *"   # 06:00 IST (00:30 UTC), every other day
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: internship-tracker
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -39,6 +43,13 @@ jobs:
           python-version: "3.13"
           cache: "pip"
 
+      - name: Restore job database
+        uses: actions/cache/restore@v4
+        with:
+          path: data
+          key: jobs-db-${{ github.run_id }}
+          restore-keys: jobs-db
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -51,7 +62,13 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           mkdir -p logs data/tier_results
           python main.py --run-all-tiers
+
+      - name: Save job database
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data
+          key: jobs-db-${{ github.run_id }}

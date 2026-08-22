@@ -76,7 +76,6 @@ def _check_grad_year(title: str, description: str | None, allowed_years: list[Op
 
 
 def check_job_filters(job: RawJob, config: FiltersConfig, skip_location_filter: bool = False) -> tuple[bool, list[str]]:
-    reasons: list[str] = []
     title = job.title or ""
     description = job.description or ""
 
@@ -120,12 +119,9 @@ def check_job_filters(job: RawJob, config: FiltersConfig, skip_location_filter: 
         if job.employment_type and _list_match(job.employment_type, emp_exclude):
             return False, ["Excluded by employment type"]
 
-    if emp_include:
-        if job.employment_type:
-            if not _list_match(job.employment_type, emp_include):
-                return False, ["Employment type not in include list"]
-        else:
-            return False, ["No employment type specified"]
+    # ponytail: unknown employment_type passes (most ATS APIs omit it) — reject only on explicit mismatch
+    if emp_include and job.employment_type and not _list_match(job.employment_type, emp_include):
+        return False, ["Employment type not in include list"]
 
     if not _check_grad_year(title, description, config.allowed_grad_years):
         return False, ["Graduation year not in allowed list"]
@@ -133,6 +129,4 @@ def check_job_filters(job: RawJob, config: FiltersConfig, skip_location_filter: 
     if not _check_max_age(job.date_posted, config.max_posting_age_days):
         return False, ["Posting exceeds max age"]
 
-    if reasons:
-        return True, reasons
     return True, ["Passed all filters"]
