@@ -104,7 +104,8 @@ class GreenhouseScraper(BaseScraper):
                     employment_type = value
                     break
 
-        date_posted = (job_data.get("updated_at") or "").strip() or None
+        # first_published is the true posting date; updated_at bumps on any edit
+        date_posted = (job_data.get("first_published") or "").strip() or (job_data.get("updated_at") or "").strip() or None
         description = (job_data.get("content") or "").strip() or None
 
         return RawJob(

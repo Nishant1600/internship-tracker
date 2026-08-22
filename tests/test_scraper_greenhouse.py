@@ -50,6 +50,23 @@ async def test_greenhouse_parses_jobs(stripe_config, scraper_config):
 
 
 @pytest.mark.asyncio
+async def test_greenhouse_prefers_first_published(stripe_config, scraper_config):
+    fixture_path = FIXTURES / "greenhouse_stripe.json"
+    with open(fixture_path) as f:
+        raw_data = json.load(f)
+
+    scraper = GreenhouseScraper(stripe_config, scraper_config)
+    async with respx.mock:
+        respx.get(
+            "https://api.greenhouse.io/v1/boards/stripe/jobs"
+        ).respond(json=raw_data)
+        jobs = [job async for job in scraper.fetch()]
+
+    # first job: published 2026-06-02, updated 2026-06-26 — must use the publish date
+    assert jobs[0].date_posted == "2026-06-02T08:58:57-04:00"
+
+
+@pytest.mark.asyncio
 async def test_greenhouse_handles_404(stripe_config, scraper_config):
     scraper = GreenhouseScraper(stripe_config, scraper_config)
 

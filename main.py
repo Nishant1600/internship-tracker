@@ -78,6 +78,9 @@ async def _scrape_company(company, config, repo, logger) -> tuple[list, int]:
 
     matched = []
     for raw_job in raw_jobs:
+        # ponytail: job without a link can't be applied to — drop at source
+        if not raw_job.url or not raw_job.url.strip():
+            continue
         if config.features.dedup_notifications and should_skip_dedup(raw_job, repo, True):
             continue
 
@@ -96,6 +99,50 @@ async def _scrape_company(company, config, repo, logger) -> tuple[list, int]:
     return matched, len(raw_jobs)
 
 
+async def _run_tier(tier_companies, config, repo, logger) -> tuple[list, int, list[str]]:
+    """Scrape a tier — JSON-API scrapers concurrently, Playwright sequentially.
+    Returns (matched_jobs, raw_seen, failed_company_names)."""
+    sem = asyncio.Semaphore(max(1, config.scraper.max_concurrency))
+    jobs: list = []
+    raw_total = 0
+    failed: list[str] = []
+
+    async def worker(company):
+        nonlocal raw_total
+        try:
+            matched, raw = await _scrape_company(company, config, repo, logger)
+            jobs.extend(matched)
+            raw_total += raw
+        except Exception as e:
+            logger.error("[%s] Unexpected error: %s", company.name, e)
+            failed.append(company.name)
+
+    async def bounded(company):
+        async with sem:
+            await worker(company)
+
+    api_tasks = []
+    playwright = []
+    for company in tier_companies:
+        try:
+            scraper = get_scraper(company, config.scraper)
+        except ValueError as e:
+            logger.warning("[%s] %s", company.name, e)
+            failed.append(company.name)
+            continue
+        if _is_playwright_scraper(scraper):
+            playwright.append(company)  # memory-heavy: run one at a time
+        else:
+            api_tasks.append(asyncio.create_task(bounded(company)))
+
+    if api_tasks:
+        await asyncio.gather(*api_tasks)
+    for company in playwright:
+        await worker(company)
+
+    return jobs, raw_total, failed
+
+
 async def run_tier(tier_name: str, config_path: str) -> dict:
     """Scrape a single tier and save results to disk. Returns stats dict."""
     config = load_config(config_path)
@@ -110,21 +157,8 @@ async def run_tier(tier_name: str, config_path: str) -> dict:
     logger.info("── Tier: %s (%d companies) ──", tier_name, len(tier_companies))
     start = time.time()
     repo = JobRepository(config.database.path)
-    tier_jobs = []
-    tier_failed = 0
-    tier_raw = 0
 
-    for company in tier_companies:
-        try:
-            jobs, raw_count = await _scrape_company(company, config, repo, logger)
-            tier_jobs.extend(jobs)
-            tier_raw += raw_count
-            if jobs:
-                logger.info("[%s] +%d jobs", company.name, len(jobs))
-        except Exception as e:
-            logger.error("[%s] Unexpected error: %s", company.name, e)
-            tier_failed += 1
-
+    tier_jobs, tier_raw, failed_names = await _run_tier(tier_companies, config, repo, logger)
     elapsed = time.time() - start
 
     job_ids = [j.id for j in tier_jobs if j.id is not None]
@@ -133,7 +167,8 @@ async def run_tier(tier_name: str, config_path: str) -> dict:
         "companies": len(tier_companies),
         "jobs": len(tier_jobs),
         "raw": tier_raw,
-        "failed": tier_failed,
+        "failed": len(failed_names),
+        "failed_companies": failed_names,
         "elapsed": elapsed,
         "job_ids": job_ids,
     }
@@ -167,20 +202,8 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
 
         logger.info("── Tier: %s (%d companies) ──", tier_name, len(tier_companies))
         tier_start = time.time()
-        tier_jobs = []
-        tier_failed = 0
-        tier_raw = 0
 
-        for company in tier_companies:
-            try:
-                jobs, raw_count = await _scrape_company(company, config, repo, logger)
-                tier_jobs.extend(jobs)
-                tier_raw += raw_count
-                if jobs:
-                    logger.info("[%s] +%d jobs", company.name, len(jobs))
-            except Exception as e:
-                logger.error("[%s] Unexpected error: %s", company.name, e)
-                tier_failed += 1
+        tier_jobs, tier_raw, failed_names = await _run_tier(tier_companies, config, repo, logger)
 
         tier_elapsed = time.time() - tier_start
         tier_stats = {
@@ -188,7 +211,8 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
             "companies": len(tier_companies),
             "jobs": len(tier_jobs),
             "raw": tier_raw,
-            "failed": tier_failed,
+            "failed": len(failed_names),
+            "failed_companies": failed_names,
             "elapsed": tier_elapsed,
         }
         tier_results.append(tier_stats)
@@ -215,6 +239,8 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
             try:
                 agg = AggregatorScraper(source)
                 async for raw_job in agg.fetch():
+                    if not raw_job.url or not raw_job.url.strip():
+                        continue
                     if config.features.dedup_notifications and should_skip_dedup(raw_job, repo, True):
                         continue
                     passes, _ = check_job_filters(raw_job, agg_filters)

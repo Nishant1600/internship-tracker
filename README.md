@@ -27,7 +27,8 @@ python main.py --daemon
 
 Everything user-tunable lives in `config.yaml`:
 - **Schedule**: time and timezone for daily digest
-- **Scrapers**: timeout, retry count, headless mode
+- **Scrapers**: timeout, retry count, headless mode, `max_concurrency` (parallel JSON-API scrapers per tier; Playwright scrapers always run sequentially)
+- **Database**: `path`, `prune_days` (delete notified jobs not seen this long; 0 disables)
 - **Filters**: role keywords, title keywords, locations, employment types, graduation years, max posting age, minimum match score
 - **Hiring Agent**: path to the hiring-agent repo, resume PDF path, LLM backend (gemini/ollama)
 - **Telegram**: max jobs per digest, empty digest toggle
@@ -74,7 +75,13 @@ python main.py --daemon
 ```
 
 ### GitHub Actions
-`.github/workflows/internship-tracker.yml` runs tests then the pipeline every other day (06:00 IST) via `schedule`, with `BOT_TOKEN` and `CHAT_ID` repo secrets. The SQLite DB in `data/` is persisted between runs via the actions cache, so dedup works across runs. Trigger manually with `workflow_dispatch`.
+`.github/workflows/internship-tracker.yml` runs tests then the pipeline every other day (06:00 IST) via `schedule`, with `BOT_TOKEN` and `CHAT_ID` repo secrets. Trigger manually with `workflow_dispatch`.
+
+Reliability features:
+- The SQLite DB in `data/` persists between runs via the actions cache, so dedup works across runs.
+- If the job crashes, you get a Telegram message with the run link; `logs/` is uploaded as a 7-day artifact on every run.
+- If scrapers return zero raw jobs across all companies (likely blocked), you get a forced ⚠️ warning even with `send_if_empty: false`.
+- Tier digests are capped at `max_jobs_per_digest` and list failed company names so dead boards can be removed from config.
 
 ## Project Structure
 

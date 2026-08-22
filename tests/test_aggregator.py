@@ -63,6 +63,31 @@ async def test_aggregator_relative_dates_become_iso(source):
 
 
 @pytest.mark.asyncio
+async def test_aggregator_batch_years_filter(source):
+    md = """# Jobs
+
+| Company | Role | Location | Link | Date |
+|---------|------|----------|------|------|
+| OldCo | 2026 SWE Intern | NYC | [Apply](https://oldco.com) | 1 day ago |
+| NewCo | 2027 SWE Intern | NYC | [Apply](https://newco.com) | 1 day ago |
+| PlainCo | SWE Intern | NYC | [Apply](https://plainco.com) | 1 day ago |
+"""
+    strict_source = AggregatorSource(
+        name="strict", url=source.url, batch_years=[2027]
+    )
+    scraper = AggregatorScraper(strict_source)
+
+    async with respx.mock:
+        respx.get(source.url).respond(text=md)
+        jobs = [job async for job in scraper.fetch()]
+
+    names = [j.company for j in jobs]
+    assert "OldCo" not in names       # targets a batch year outside the set
+    assert "NewCo" in names           # matches batch_years
+    assert "PlainCo" in names         # no year mentioned -> keep
+
+
+@pytest.mark.asyncio
 async def test_aggregator_handles_404(source):
     scraper = AggregatorScraper(source)
 

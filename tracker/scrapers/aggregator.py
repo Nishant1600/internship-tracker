@@ -18,6 +18,7 @@ from typing import AsyncIterator
 import httpx
 
 from tracker.config import AggregatorSource
+from tracker.filters import GRAD_YEAR_PATTERN
 from tracker.models import RawJob
 from tracker.logger import get_logger
 
@@ -148,6 +149,13 @@ class AggregatorScraper:
             job = _parse_row(stripped)
             if not job:
                 continue
+
+            # batch_years: drop rows targeting grad years outside the configured set
+            if self._source.batch_years:
+                text = f"{job.title} {job.description or ''}"
+                years = {int(m.group(1)) for m in GRAD_YEAR_PATTERN.finditer(text)}
+                if years and not (years & set(self._source.batch_years)):
+                    continue
 
             job.source_ats = source_tag
             yield job

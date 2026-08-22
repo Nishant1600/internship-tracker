@@ -150,8 +150,20 @@ def _format_summary(stats: dict) -> str:
         for t in tiers:
             emoji = TIER_EMOJI.get(t["tier"], "📋")
             lines.append(f"  {emoji} {t['tier']}: {t['jobs']}/{t['companies']} in {t['elapsed']:.0f}s")
+            failed_line = _fmt_failed(t.get("failed_companies") or [])
+            if failed_line:
+                lines.append(f"    {failed_line}")
         return "\n".join(lines)
     return summary
+
+
+def _fmt_failed(names: list[str]) -> str | None:
+    if not names:
+        return None
+    shown = ", ".join(names[:8])
+    if len(names) > 8:
+        shown += f" +{len(names) - 8} more"
+    return f"⚠️ Failed: {shown}"
 
 
 class TelegramNotifier(Notifier):
@@ -225,6 +237,9 @@ class TelegramNotifier(Notifier):
             f"{tier_stats.get('failed', 0)} failed | "
             f"{tier_stats.get('elapsed', 0):.0f}s"
         )
+        failed_line = _fmt_failed(tier_stats.get("failed_companies") or [])
+        if failed_line:
+            summary += "\n" + failed_line
 
         messages = _split_message(header, body_lines)
         if messages:

@@ -38,6 +38,7 @@ class ScraperConfig(BaseModel):
     retry_count: int = 3
     retry_backoff_seconds: int = 5
     headless: bool = True
+    max_concurrency: int = 6  # parallel JSON-API scrapers per tier; Playwright always sequential
 
 
 class FilterList(BaseModel):
