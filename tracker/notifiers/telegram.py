@@ -5,6 +5,7 @@ from telegram import Bot
 from telegram.error import TelegramError
 
 from tracker.config import TelegramConfig
+from tracker.filters import parse_posted_date
 from tracker.logger import get_logger
 from tracker.models import Job
 from tracker.notifiers.base import Notifier
@@ -30,11 +31,31 @@ def _format_tier_header(tier: str, job_count: int) -> str:
     return f"{emoji} {label} — {job_count} new jobs"
 
 
+def _age_str(date_posted: str | None) -> str | None:
+    dt = parse_posted_date(date_posted)
+    if not dt:
+        return None
+    days = (datetime.now(timezone.utc) - dt).days
+    if days < 0:
+        return "new"
+    if days == 0:
+        return "today"
+    return f"{days}d ago"
+
+
 def _format_job_lines(jobs: list[Job]) -> list[str]:
     lines: list[str] = []
     for job in jobs:
         title = f"{job.company} — {job.title}"
         lines.append(f"  {title}")
+        meta = []
+        if job.location:
+            meta.append(job.location)
+        age = _age_str(job.date_posted)
+        if age:
+            meta.append(age)
+        if meta:
+            lines.append(f"  {' · '.join(meta)}")
         if job.url:
             lines.append(f"  {job.url}")
         lines.append("")
@@ -187,12 +208,17 @@ class TelegramNotifier(Notifier):
         jobs: list[Job],
         tier_stats: dict,
     ) -> bool:
-        """Send a digest for a single tier, splitting across messages if needed."""
+        """Send a digest for a single tier, capped at max_jobs_per_digest."""
         if not jobs:
             return False
 
+        cap = self._config.max_jobs_per_digest
+        body_lines = _format_job_lines(jobs[:cap])
+        if len(jobs) > cap:
+            body_lines.append(f"  ...and {len(jobs) - cap} more")
+            body_lines.append("")
+
         header = _format_tier_header(tier_name, len(jobs))
-        body_lines = _format_job_lines(jobs)
         summary = (
             f"{tier_stats.get('companies', 0)} companies | "
             f"{len(jobs)} new jobs | "

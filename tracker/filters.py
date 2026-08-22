@@ -34,28 +34,35 @@ def _check_exclude(title: str, description: str | None, exclude: list[str]) -> b
     return False
 
 
+DATE_FORMATS = (
+    "%Y-%m-%dT%H:%M:%S.%fZ",
+    "%Y-%m-%dT%H:%M:%SZ",
+    "%Y-%m-%dT%H:%M:%S%z",
+    "%Y-%m-%dT%H:%M:%S.%f%z",
+    "%Y-%m-%d",
+)
+
+
+def parse_posted_date(date_posted: str | None) -> Optional[datetime]:
+    """Parse a posting timestamp into an aware UTC datetime, or None if unparseable."""
+    if not date_posted:
+        return None
+    for fmt in DATE_FORMATS:
+        try:
+            dt = datetime.strptime(date_posted, fmt)
+            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    return None
+
+
 def _check_max_age(date_posted: str | None, max_days: int) -> bool:
     if not date_posted or max_days <= 0:
         return True
-    try:
-        for fmt in (
-            "%Y-%m-%dT%H:%M:%S.%fZ",
-            "%Y-%m-%dT%H:%M:%SZ",
-            "%Y-%m-%dT%H:%M:%S%z",
-            "%Y-%m-%dT%H:%M:%S.%f%z",
-            "%Y-%m-%d",
-        ):
-            try:
-                dt = datetime.strptime(date_posted, fmt)
-                if dt.tzinfo is None:
-                    dt = dt.replace(tzinfo=timezone.utc)
-                age = (datetime.now(timezone.utc) - dt).days
-                return age <= max_days
-            except ValueError:
-                continue
-    except (ValueError, TypeError):
-        pass
-    return True
+    dt = parse_posted_date(date_posted)
+    if dt is None:
+        return True
+    return (datetime.now(timezone.utc) - dt).days <= max_days
 
 
 def _check_grad_year(title: str, description: str | None, allowed_years: list[Optional[int]]) -> bool:

@@ -41,7 +41,8 @@ class GreenhouseScraper(BaseScraper):
                 board = last
         # Use the JSON API
         api_url = f"https://api.greenhouse.io/v1/boards/{board}/jobs"
-        params: dict[str, str | int] = {}
+        # content=true includes job descriptions + metadata so keyword/grad-year filters see full text
+        params: dict[str, str | int] = {"content": "true"}
         page = 1
 
         async with httpx.AsyncClient(timeout=self.config.timeout_seconds, follow_redirects=True) as client:

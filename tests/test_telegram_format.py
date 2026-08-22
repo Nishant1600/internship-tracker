@@ -1,7 +1,10 @@
+import logging
+
 import pytest
 
+from tracker.config import TelegramConfig
 from tracker.models import Job
-from tracker.notifiers.telegram import format_digest
+from tracker.notifiers.telegram import TelegramNotifier, _format_job_lines, format_digest
 
 
 def make_job(
@@ -79,3 +82,39 @@ class TestFormatDigest:
         result = format_digest(jobs, {}, max_jobs=25)
         assert "Easy (2)" in result
         assert "Hard (1)" in result
+
+
+class TestJobLines:
+    def test_location_and_age_shown(self):
+        lines = _format_job_lines([make_job(location="Bangalore, India")])
+        joined = "\n".join(lines)
+        assert "Bangalore, India" in joined
+        assert "d ago" in joined
+
+    def test_no_meta_when_missing(self):
+        job = make_job(location=None)
+        job.date_posted = None
+        joined = "\n".join(_format_job_lines([job]))
+        assert "·" not in joined
+
+
+class TestTierDigest:
+    @pytest.mark.asyncio
+    async def test_capped_at_max_jobs_per_digest(self, caplog):
+        notifier = TelegramNotifier(TelegramConfig(enabled=True, max_jobs_per_digest=3))
+        jobs = [make_job(company=f"C{i}") for i in range(5)]
+        with caplog.at_level(logging.INFO, logger="tracker"):
+            await notifier.send_tier_digest("easy", jobs, {"companies": 1, "failed": 0, "elapsed": 0})
+        text = "\n".join(r.getMessage() for r in caplog.records)
+        assert "...and 2 more" in text
+        assert text.count("http") == 3
+
+    @pytest.mark.asyncio
+    async def test_under_cap_sends_all(self, caplog):
+        notifier = TelegramNotifier(TelegramConfig(enabled=True, max_jobs_per_digest=25))
+        jobs = [make_job(company=f"C{i}") for i in range(3)]
+        with caplog.at_level(logging.INFO, logger="tracker"):
+            await notifier.send_tier_digest("easy", jobs, {"companies": 1, "failed": 0, "elapsed": 0})
+        text = "\n".join(r.getMessage() for r in caplog.records)
+        assert "and" not in text.split("new jobs")[0] or "...and" not in text
+        assert text.count("http") == 3
