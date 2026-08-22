@@ -236,6 +236,15 @@ class TelegramNotifier(Notifier):
         )
         return await self._send_messages(messages)
 
+    async def send_watchdog(self, companies_scraped: int, failed: int) -> bool:
+        """Forced alert: scrapers ran but returned zero jobs. Bypasses send_if_empty."""
+        text = f"⚠️ Tracker scraped {companies_scraped} companies and found 0 jobs"
+        if failed:
+            text += f" ({failed} scrapers failed)"
+        text += ".\nScrapers may be blocked or career pages changed — check the run logs."
+        logger.warning(text)
+        return await self._send_messages([text])
+
     async def send_digest(
         self,
         jobs: list[tuple[Job, str]],

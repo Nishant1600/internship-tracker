@@ -25,6 +25,7 @@ class ScheduleConfig(BaseModel):
 
 class DatabaseConfig(BaseModel):
     path: str = "./data/jobs.db"
+    prune_days: int = 90  # notified jobs not seen this long are deleted; 0 disables
 
 
 class LoggingConfig(BaseModel):

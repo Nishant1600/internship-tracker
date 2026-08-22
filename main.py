@@ -34,8 +34,8 @@ _COMPANY_TIMEOUT_SECONDS = 600
 _PLAYWRIGHT_TIMEOUT_SECONDS = 600
 
 
-async def _scrape_company(company, config, repo, logger) -> list:
-    """Scrape a single company. Returns list of matched Jobs."""
+async def _scrape_company(company, config, repo, logger) -> tuple[list, int]:
+    """Scrape a single company. Returns (matched Jobs, raw jobs seen)."""
     try:
         scraper = get_scraper(company, config.scraper)
     except ValueError as e:
@@ -93,7 +93,7 @@ async def _scrape_company(company, config, repo, logger) -> list:
         gc.collect()
         await asyncio.sleep(0.5)
 
-    return matched
+    return matched, len(raw_jobs)
 
 
 async def run_tier(tier_name: str, config_path: str) -> dict:
@@ -112,11 +112,13 @@ async def run_tier(tier_name: str, config_path: str) -> dict:
     repo = JobRepository(config.database.path)
     tier_jobs = []
     tier_failed = 0
+    tier_raw = 0
 
     for company in tier_companies:
         try:
-            jobs = await _scrape_company(company, config, repo, logger)
+            jobs, raw_count = await _scrape_company(company, config, repo, logger)
             tier_jobs.extend(jobs)
+            tier_raw += raw_count
             if jobs:
                 logger.info("[%s] +%d jobs", company.name, len(jobs))
         except Exception as e:
@@ -130,6 +132,7 @@ async def run_tier(tier_name: str, config_path: str) -> dict:
         "tier": tier_name,
         "companies": len(tier_companies),
         "jobs": len(tier_jobs),
+        "raw": tier_raw,
         "failed": tier_failed,
         "elapsed": elapsed,
         "job_ids": job_ids,
@@ -166,11 +169,13 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
         tier_start = time.time()
         tier_jobs = []
         tier_failed = 0
+        tier_raw = 0
 
         for company in tier_companies:
             try:
-                jobs = await _scrape_company(company, config, repo, logger)
+                jobs, raw_count = await _scrape_company(company, config, repo, logger)
                 tier_jobs.extend(jobs)
+                tier_raw += raw_count
                 if jobs:
                     logger.info("[%s] +%d jobs", company.name, len(jobs))
             except Exception as e:
@@ -182,6 +187,7 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
             "tier": tier_name,
             "companies": len(tier_companies),
             "jobs": len(tier_jobs),
+            "raw": tier_raw,
             "failed": tier_failed,
             "elapsed": tier_elapsed,
         }
@@ -234,6 +240,13 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
 
     total_companies = config.companies.total if not tier_filter else tier_results[0]["companies"] if tier_results else 0
     total_failed = sum(r["failed"] for r in tier_results)
+    total_raw = sum(r["raw"] for r in tier_results)
+
+    # Watchdog: scrapers ran but returned nothing at all — likely blocked, not a quiet day
+    if total_companies and total_raw == 0:
+        await notifier.send_watchdog(total_companies, total_failed)
+
+    _maybe_prune(repo, config, logger)
 
     elapsed = time.time() - start_time
     logger.info(
@@ -279,6 +292,13 @@ def run_all_tiers_separate(config_path: str) -> None:
 
     logger.info("All tiers complete. Aggregating results...")
     _aggregate_and_notify(config_path)
+
+
+def _maybe_prune(repo: JobRepository, config, logger) -> None:
+    if config.database.prune_days > 0:
+        pruned = repo.prune(config.database.prune_days)
+        if pruned:
+            logger.info("Pruned %d jobs not seen in %d days", pruned, config.database.prune_days)
 
 
 def _aggregate_and_notify(config_path: str) -> None:
@@ -328,15 +348,21 @@ def _aggregate_and_notify(config_path: str) -> None:
                     repo.mark_notified(job.id)
 
         if not grouped:
-            stats = {
-                "total_scraped": total_companies,
-                "passed_filters": 0,
-                "new_today": 0,
-                "failed": total_failed,
-                "tiers": tier_results,
-            }
-            await notifier.send_digest([], stats)
+            raw_total = sum(r.get("raw", 0) for r in tier_results)
+            if total_companies and raw_total == 0:
+                # Watchdog: scrapers ran but returned nothing — likely blocked, not a quiet day
+                await notifier.send_watchdog(total_companies, total_failed)
+            else:
+                stats = {
+                    "total_scraped": total_companies,
+                    "passed_filters": 0,
+                    "new_today": 0,
+                    "failed": total_failed,
+                    "tiers": tier_results,
+                }
+                await notifier.send_digest([], stats)
 
+    _maybe_prune(repo, config, logger)
     asyncio.run(_send())
     repo.close()
 

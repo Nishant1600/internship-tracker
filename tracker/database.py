@@ -1,6 +1,6 @@
 import hashlib
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -134,6 +134,26 @@ class JobRepository:
             "UPDATE jobs SET notified_at = ? WHERE id = ?", (now, job_id)
         )
         self._conn.commit()
+
+    def touch(self, job_id: int) -> None:
+        """Refresh date_last_seen for a re-encountered job."""
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        self._conn.execute(
+            "UPDATE jobs SET date_last_seen = ? WHERE id = ?", (now, job_id)
+        )
+        self._conn.commit()
+
+    def prune(self, max_age_days: int) -> int:
+        """Delete notified jobs not seen recently. Returns rows deleted."""
+        cutoff = (
+            datetime.now(timezone.utc) - timedelta(days=max_age_days)
+        ).strftime("%Y-%m-%d %H:%M:%S")
+        cursor = self._conn.execute(
+            "DELETE FROM jobs WHERE notified_at IS NOT NULL AND date_last_seen < ?",
+            (cutoff,),
+        )
+        self._conn.commit()
+        return cursor.rowcount
 
     def get_unnotified(self) -> list[Job]:
         cursor = self._conn.execute(

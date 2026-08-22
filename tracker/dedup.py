@@ -10,5 +10,6 @@ def should_skip_dedup(
     if existing is None:
         return False
     if dedup_notifications and existing.notified_at is not None:
+        repo.touch(existing.id)  # keep date_last_seen accurate so pruning works
         return True
     return False

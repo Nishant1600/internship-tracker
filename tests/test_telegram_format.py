@@ -118,3 +118,23 @@ class TestTierDigest:
         text = "\n".join(r.getMessage() for r in caplog.records)
         assert "and" not in text.split("new jobs")[0] or "...and" not in text
         assert text.count("http") == 3
+
+
+class TestWatchdog:
+    @pytest.mark.asyncio
+    async def test_watchdog_message(self, caplog):
+        notifier = TelegramNotifier(TelegramConfig(enabled=True))
+        with caplog.at_level(logging.INFO, logger="tracker"):
+            ok = await notifier.send_watchdog(330, 12)
+        assert ok is False  # no secrets configured -> logged, not sent
+        text = "\n".join(r.getMessage() for r in caplog.records)
+        assert "330 companies and found 0 jobs" in text
+        assert "12 scrapers failed" in text
+
+    @pytest.mark.asyncio
+    async def test_watchdog_without_failures(self, caplog):
+        notifier = TelegramNotifier(TelegramConfig(enabled=True))
+        with caplog.at_level(logging.INFO, logger="tracker"):
+            await notifier.send_watchdog(100, 0)
+        text = "\n".join(r.getMessage() for r in caplog.records)
+        assert "scrapers failed" not in text
