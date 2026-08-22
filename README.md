@@ -19,6 +19,9 @@ cp .env.example .env
 # Run once
 python main.py --run-now
 
+# Validate config without scraping
+python main.py --check-config
+
 # Run as daemon (APScheduler, runs daily at configured time)
 python main.py --daemon
 ```
@@ -82,6 +85,7 @@ Reliability features:
 - If the job crashes, you get a Telegram message with the run link; `logs/` is uploaded as a 7-day artifact on every run.
 - If scrapers return zero raw jobs across all companies (likely blocked), you get a forced ⚠️ warning even with `send_if_empty: false`.
 - Tier digests are capped at `max_jobs_per_digest` and list failed company names so dead boards can be removed from config.
+- A compact ✅ heartbeat (companies · new jobs · failed · duration) is sent after every run; disable with `telegram.heartbeat: false`.
 
 ## Project Structure
 

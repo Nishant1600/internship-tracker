@@ -260,6 +260,17 @@ class TelegramNotifier(Notifier):
         logger.warning(text)
         return await self._send_messages([text])
 
+    async def send_heartbeat(self, stats: dict, elapsed_s: float) -> bool:
+        """Compact end-of-run summary sent every run regardless of send_if_empty."""
+        parts = [
+            f"{stats.get('total_scraped', 0)} companies",
+            f"{stats.get('new_today', 0)} new jobs",
+        ]
+        if stats.get("failed"):
+            parts.append(f"{stats['failed']} failed")
+        parts.append(f"{elapsed_s / 60:.0f}m")
+        return await self._send_messages(["✅ Tracker run done — " + " · ".join(parts)])
+
     async def send_digest(
         self,
         jobs: list[tuple[Job, str]],

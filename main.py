@@ -269,7 +269,7 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
     total_raw = sum(r["raw"] for r in tier_results)
 
     # Watchdog: scrapers ran but returned nothing at all — likely blocked, not a quiet day
-    if total_companies and total_raw == 0:
+    if _is_dry_run(tier_results, total_companies):
         await notifier.send_watchdog(total_companies, total_failed)
 
     _maybe_prune(repo, config, logger)
@@ -279,6 +279,12 @@ async def run_pipeline(config_path: str, tier_filter: str | None = None) -> dict
         "Pipeline complete: %d companies | %d failed | %.1fs",
         total_companies, total_failed, elapsed,
     )
+
+    if config.telegram.heartbeat:
+        await notifier.send_heartbeat(
+            {"total_scraped": total_companies, "new_today": len(all_matched_jobs), "failed": total_failed},
+            elapsed,
+        )
 
     repo.close()
     return {
@@ -318,6 +324,13 @@ def run_all_tiers_separate(config_path: str) -> None:
 
     logger.info("All tiers complete. Aggregating results...")
     _aggregate_and_notify(config_path)
+
+
+def _is_dry_run(tier_results: list, total_companies: int) -> bool:
+    """True when companies were scraped but zero raw jobs came back — scrapers likely blocked."""
+    return bool(total_companies) and bool(tier_results) and all(
+        r.get("raw", 0) == 0 for r in tier_results
+    )
 
 
 def _maybe_prune(repo: JobRepository, config, logger) -> None:
@@ -374,8 +387,7 @@ def _aggregate_and_notify(config_path: str) -> None:
                     repo.mark_notified(job.id)
 
         if not grouped:
-            raw_total = sum(r.get("raw", 0) for r in tier_results)
-            if total_companies and raw_total == 0:
+            if _is_dry_run(tier_results, total_companies):
                 # Watchdog: scrapers ran but returned nothing — likely blocked, not a quiet day
                 await notifier.send_watchdog(total_companies, total_failed)
             else:
@@ -390,6 +402,11 @@ def _aggregate_and_notify(config_path: str) -> None:
 
     _maybe_prune(repo, config, logger)
     asyncio.run(_send())
+    if config.telegram.heartbeat:
+        asyncio.run(notifier.send_heartbeat(
+            {"total_scraped": total_companies, "new_today": len(all_matched), "failed": total_failed},
+            sum(r.get("elapsed", 0) for r in tier_results),
+        ))
     repo.close()
 
     for f in RESULTS_DIR.glob("*.json"):
@@ -402,6 +419,41 @@ async def run_now(config_path: str) -> None:
 
 async def daily_job_wrapper(config_path: str):
     return await run_pipeline(config_path)
+
+
+def check_config(config_path: str) -> int:
+    """Offline config validation. Returns exit code (0 ok, 1 errors)."""
+    try:
+        config = load_config(config_path)
+    except Exception as e:
+        print(f"✗ Config invalid: {e}")
+        return 1
+
+    tiers = config.companies.by_tier()
+    errors = []
+    warnings = []
+    seen_names: dict[str, str] = {}
+
+    for tier_name, companies in tiers:
+        for c in companies:
+            key = c.name.lower()
+            if key in seen_names:
+                warnings.append(
+                    f"duplicate company '{c.name}' in '{tier_name}' (already in '{seen_names[key]}')"
+                )
+            else:
+                seen_names[key] = tier_name
+            if c.ats == "html" and not c.css_selector:
+                errors.append(f"[{tier_name}] {c.name}: ats 'html' requires css_selector")
+            if not c.url.startswith(("http://", "https://")):
+                errors.append(f"[{tier_name}] {c.name}: url must be http(s), got '{c.url}'")
+
+    print(f"✓ {config.companies.total} companies across {len(tiers)} tiers")
+    for w in warnings:
+        print(f"⚠ {w}")
+    for e in errors:
+        print(f"✗ {e}")
+    return 1 if errors else 0
 
 
 def main() -> None:
@@ -427,6 +479,11 @@ def main() -> None:
         help="Aggregate tier results and send Telegram",
     )
     parser.add_argument(
+        "--check-config",
+        action="store_true",
+        help="Validate config.yaml without scraping",
+    )
+    parser.add_argument(
         "--config",
         type=str,
         default=str(PROJECT_ROOT / "config.yaml"),
@@ -438,6 +495,9 @@ def main() -> None:
         help="Run as a long-lived daemon with APScheduler",
     )
     args = parser.parse_args()
+
+    if args.check_config:
+        sys.exit(check_config(args.config))
 
     if args.run_now:
         asyncio.run(run_now(args.config))

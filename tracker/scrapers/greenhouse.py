@@ -1,10 +1,19 @@
 from typing import AsyncIterator, Any
+import html as _html
+import re
 
 import httpx
 
 from tracker.config import CompanyConfig, ScraperConfig
 from tracker.models import RawJob
 from tracker.scrapers.base import BaseScraper
+
+_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def _strip_html(text: str) -> str:
+    """Unescape entities and drop tags so filters/DB see clean text."""
+    return re.sub(r"\s+", " ", _html.unescape(_TAG_RE.sub(" ", text))).strip()
 
 
 def _safe_str(val: Any) -> str:
@@ -106,7 +115,7 @@ class GreenhouseScraper(BaseScraper):
 
         # first_published is the true posting date; updated_at bumps on any edit
         date_posted = (job_data.get("first_published") or "").strip() or (job_data.get("updated_at") or "").strip() or None
-        description = (job_data.get("content") or "").strip() or None
+        description = _strip_html(job_data.get("content") or "") or None
 
         return RawJob(
             company=self.company,

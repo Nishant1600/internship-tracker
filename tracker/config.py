@@ -59,6 +59,7 @@ class TelegramConfig(BaseModel):
     enabled: bool = False
     max_jobs_per_digest: int = 25
     send_if_empty: bool = False
+    heartbeat: bool = True  # compact end-of-run summary ping after every run
 
 
 class FeaturesConfig(BaseModel):
