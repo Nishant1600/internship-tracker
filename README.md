@@ -1,6 +1,6 @@
 # Personal Internship Alert System
 
-A single-user Python application that scrapes career pages of 330+ companies, detects new internship postings, filters them against configurable preferences, scores them against a resume, and sends a daily Telegram digest.
+A single-user Python application that scrapes career pages of 330+ companies, detects new internship postings, filters them against configurable preferences, and sends a Telegram digest every other day.
 
 ## Quick Start
 
@@ -32,9 +32,8 @@ Everything user-tunable lives in `config.yaml`:
 - **Schedule**: time and timezone for daily digest
 - **Scrapers**: timeout, retry count, headless mode, `max_concurrency` (parallel JSON-API scrapers per tier; Playwright scrapers always run sequentially)
 - **Database**: `path`, `prune_days` (delete notified jobs not seen this long; 0 disables)
-- **Filters**: role keywords, title keywords, locations, employment types, graduation years, max posting age, minimum match score
-- **Hiring Agent**: path to the hiring-agent repo, resume PDF path, LLM backend (gemini/ollama)
-- **Telegram**: max jobs per digest, empty digest toggle
+- **Filters**: role keywords, title keywords, locations, employment types, graduation years, max posting age
+- **Telegram**: max jobs per digest, empty digest toggle, heartbeat ping toggle
 - **Company List**: 330+ companies pre-populated across ATS types (Greenhouse, Lever, Ashby, SmartRecruiters, BambooHR, Workday, HTML fallback)
 
 ### Adding a Company
@@ -118,11 +117,6 @@ internship-tracker/
       html_fallback.py       # Generic Playwright + CSS selector
       aggregator.py          # GitHub markdown table parser
 
-    matching/
-      hiring_agent.py        # Subprocess wrapper for hiring-agent
-      job_matcher.py         # Keyword overlap scoring
-      resume_fallback.py     # Hardcoded resume profile
-
     notifiers/
       base.py                # Notifier ABC
       telegram.py            # Telegram digest formatter + sender
@@ -147,7 +141,6 @@ All tests use saved fixtures via `respx` — no live HTTP calls. The `unittest.m
 | Lever boards all 404 | Lever public API is legacy/deprecated; most boards return 404. Scraper logs and skips. |
 | Workday returns no jobs | Workday DOM varies by tenant; Playwright approach is best-effort. |
 | Telegram not sending | `BOT_TOKEN` or `CHAT_ID` not set in `.env`. |
-| Hiring agent fails | `python_path` or `repo_path` incorrect in config; no `.venv` in hiring-agent repo. |
 | Slow pipeline | Retries on 404/500; reduce `retry_count` or `timeout_seconds` in config. |
 
 ## Adding a New ATS Scraper
