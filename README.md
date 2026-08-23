@@ -30,7 +30,7 @@ python main.py --daemon
 
 Everything user-tunable lives in `config.yaml`:
 - **Schedule**: time and timezone for daily digest
-- **Scrapers**: timeout, retry count, headless mode, `max_concurrency` (parallel JSON-API scrapers per tier; Playwright scrapers always run sequentially)
+- **Scrapers**: timeout, retry count, headless mode, `max_concurrency` (parallel JSON-API scrapers per tier; browser scrapers share a separate pool of 2)
 - **Database**: `path`, `prune_days` (delete notified jobs not seen this long; 0 disables)
 - **Filters**: role keywords, title keywords, locations, employment types, graduation years, max posting age
 - **Telegram**: max jobs per digest, empty digest toggle, heartbeat ping toggle

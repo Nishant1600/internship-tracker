@@ -26,7 +26,7 @@ def api_company(name: str) -> CompanyConfig:
     return CompanyConfig(name=name, ats="greenhouse", url="https://x.com/boards/x/jobs")
 
 
-def test_run_tier_parallel_with_playwright_last(monkeypatch):
+def test_run_tier_parallel_pools(monkeypatch):
     calls = []
 
     async def fake_scrape(company, config, repo, logger):
@@ -43,8 +43,28 @@ def test_run_tier_parallel_with_playwright_last(monkeypatch):
     assert jobs == [f"job-A{i}" for i in range(5)] + ["job-PW"]
     assert raw == 60
     assert failed == []
-    assert len(calls) == 6
-    assert calls[-1] == "PW"  # playwright runs after the API batch
+    assert sorted(calls) == sorted(["A0", "A1", "A2", "A3", "A4", "PW"])
+
+
+def test_run_tier_browser_pool_is_smaller(monkeypatch):
+    """Browser scrapers share a separate, tighter semaphore (memory-bound)."""
+    pw_companies = [CompanyConfig(name=f"P{i}", ats="workday", url="https://x.com") for i in range(6)]
+    state = {"inflight": 0, "peak": 0}
+
+    async def slow(company, config, repo, logger):
+        state["inflight"] += 1
+        state["peak"] = max(state["peak"], state["inflight"])
+        await asyncio.sleep(0.01)
+        state["inflight"] -= 1
+        return [], 1
+
+    monkeypatch.setattr(main, "_scrape_company", slow)
+    # force browser classification so the test doesn't depend on playwright being installed
+    monkeypatch.setattr(main, "_is_playwright_scraper", lambda scraper: True)
+
+    asyncio.run(main._run_tier(pw_companies, make_cfg(6), None, FakeLogger()))
+
+    assert state["peak"] <= main._PLAYWRIGHT_CONCURRENCY
 
 
 def test_run_tier_captures_failed_names(monkeypatch):

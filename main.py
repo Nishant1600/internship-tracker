@@ -32,6 +32,7 @@ def _is_playwright_scraper(scraper) -> bool:
 
 _COMPANY_TIMEOUT_SECONDS = 600
 _PLAYWRIGHT_TIMEOUT_SECONDS = 600
+_PLAYWRIGHT_CONCURRENCY = 2  # browsers are memory-heavy; small pool instead of fully sequential
 
 
 async def _scrape_company(company, config, repo, logger) -> tuple[list, int]:
@@ -100,9 +101,10 @@ async def _scrape_company(company, config, repo, logger) -> tuple[list, int]:
 
 
 async def _run_tier(tier_companies, config, repo, logger) -> tuple[list, int, list[str]]:
-    """Scrape a tier — JSON-API scrapers concurrently, Playwright sequentially.
-    Returns (matched_jobs, raw_seen, failed_company_names)."""
-    sem = asyncio.Semaphore(max(1, config.scraper.max_concurrency))
+    """Scrape a tier — JSON-API scrapers and browser scrapers each in their own
+    bounded pool. Returns (matched_jobs, raw_seen, failed_company_names)."""
+    api_sem = asyncio.Semaphore(max(1, config.scraper.max_concurrency))
+    pw_sem = asyncio.Semaphore(_PLAYWRIGHT_CONCURRENCY)
     jobs: list = []
     raw_total = 0
     failed: list[str] = []
@@ -117,12 +119,11 @@ async def _run_tier(tier_companies, config, repo, logger) -> tuple[list, int, li
             logger.error("[%s] Unexpected error: %s", company.name, e)
             failed.append(company.name)
 
-    async def bounded(company):
-        async with sem:
+    async def bounded(company, is_pw: bool):
+        async with (pw_sem if is_pw else api_sem):
             await worker(company)
 
-    api_tasks = []
-    playwright = []
+    tasks = []
     for company in tier_companies:
         try:
             scraper = get_scraper(company, config.scraper)
@@ -130,15 +131,11 @@ async def _run_tier(tier_companies, config, repo, logger) -> tuple[list, int, li
             logger.warning("[%s] %s", company.name, e)
             failed.append(company.name)
             continue
-        if _is_playwright_scraper(scraper):
-            playwright.append(company)  # memory-heavy: run one at a time
-        else:
-            api_tasks.append(asyncio.create_task(bounded(company)))
+        is_pw = _is_playwright_scraper(scraper)
+        tasks.append(asyncio.create_task(bounded(company, is_pw)))
 
-    if api_tasks:
-        await asyncio.gather(*api_tasks)
-    for company in playwright:
-        await worker(company)
+    if tasks:
+        await asyncio.gather(*tasks)
 
     return jobs, raw_total, failed
 
