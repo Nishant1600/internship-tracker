@@ -40,7 +40,7 @@ def test_run_tier_parallel_pools(monkeypatch):
 
     jobs, raw, failed = asyncio.run(main._run_tier(companies, make_cfg(), None, FakeLogger()))
 
-    assert jobs == [f"job-A{i}" for i in range(5)] + ["job-PW"]
+    assert set(jobs) == {f"job-A{i}" for i in range(5)} | {"job-PW"}
     assert raw == 60
     assert failed == []
     assert sorted(calls) == sorted(["A0", "A1", "A2", "A3", "A4", "PW"])
