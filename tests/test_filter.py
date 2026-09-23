@@ -211,9 +211,47 @@ class TestMaxAgeFilter:
 
 
 class TestEdgeCases:
-    def test_no_location_none_location(self):
+    def test_missing_location_rejected_when_include_set(self):
         cfg = make_config()
         job = make_job(location=None)
+        ok, reasons = check_job_filters(job, cfg)
+        assert ok is False
+        assert "Missing location" in reasons
+
+    def test_empty_location_rejected_when_include_set(self):
+        cfg = make_config()
+        job = make_job(location="   ")
+        ok, reasons = check_job_filters(job, cfg)
+        assert ok is False
+        assert "Missing location" in reasons
+
+    def test_missing_location_passes_when_include_empty(self):
+        cfg = make_config(locations=FilterList(include=[], exclude=[]))
+        job = make_job(location=None)
+        ok, _ = check_job_filters(job, cfg)
+        assert ok is True
+
+    def test_missing_location_passes_when_skip_flag(self):
+        cfg = make_config()
+        job = make_job(location=None)
+        ok, _ = check_job_filters(job, cfg, skip_location_filter=True)
+        assert ok is True
+
+    def test_country_code_in_only_as_token(self):
+        # "IN" alone or "Bengaluru, IN" — not the English word "in"
+        cfg = make_config(locations=FilterList(include=["india", "in"], exclude=[]))
+        assert check_job_filters(make_job(location="IN"), cfg)[0] is True
+        assert check_job_filters(make_job(location="Bengaluru, IN"), cfg)[0] is True
+        # English "in" must not satisfy the include list
+        cfg_no_in = make_config(locations=FilterList(include=["in"], exclude=[]))
+        ok, reasons = check_job_filters(make_job(location="Located in San Francisco"), cfg_no_in)
+        assert ok is False
+        assert "Location not in include list" in reasons
+
+    def test_us_remote_still_passes_remote_keyword(self):
+        # Documented leak of the current include list: "Remote" matches anywhere.
+        cfg = make_config(locations=FilterList(include=["india", "remote"], exclude=[]))
+        job = make_job(location="US Remote")
         ok, _ = check_job_filters(job, cfg)
         assert ok is True
 

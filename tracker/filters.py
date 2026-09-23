@@ -23,6 +23,25 @@ def _list_match(text: str | None, keywords: list[str]) -> bool:
     return False
 
 
+# Tokens where bare  matching is wrong: English "in" vs country code "IN"
+_LOCATION_TOKEN_KEYS = frozenset({"in", "ind"})
+
+
+def _location_token_match(text: str, keyword: str) -> bool:
+    """Match keyword as a comma/space-delimited token, or the whole string."""
+    kw = keyword.lower()
+    if kw not in _LOCATION_TOKEN_KEYS:
+        return bool(re.search(r"\b" + re.escape(kw) + r"\b", text.lower()))
+    parts = [p.strip() for p in re.split(r"[,/;|\-–—]+", text.lower()) if p.strip()]
+    return any(p == kw for p in parts)
+
+
+def _location_list_match(text: str | None, keywords: list[str]) -> bool:
+    if not text or not keywords:
+        return False
+    return any(_location_token_match(text, kw) for kw in keywords)
+
+
 def _check_exclude(title: str, description: str | None, exclude: list[str]) -> bool:
     combined = title.lower()
     if description:
@@ -114,13 +133,15 @@ def check_job_filters(job: RawJob, config: FiltersConfig, skip_location_filter: 
             return False, ["No matching title keyword"]
 
     if loc_exclude and not skip_location_filter:
-        if job.location and _list_match(job.location, loc_exclude):
+        if job.location and _location_list_match(job.location, loc_exclude):
             return False, ["Excluded by location"]
 
     if loc_include and not skip_location_filter:
-        if job.location:
-            if not _list_match(job.location, loc_include):
-                return False, ["Location not in include list"]
+        # Fail closed: an include list is meaningless if missing location bypasses it.
+        if not (job.location and job.location.strip()):
+            return False, ["Missing location"]
+        if not _location_list_match(job.location, loc_include):
+            return False, ["Location not in include list"]
 
     if emp_exclude:
         if job.employment_type and _list_match(job.employment_type, emp_exclude):
