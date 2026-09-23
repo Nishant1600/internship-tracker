@@ -23,7 +23,7 @@ def _list_match(text: str | None, keywords: list[str]) -> bool:
     return False
 
 
-# Tokens where bare  matching is wrong: English "in" vs country code "IN"
+# ponytail: English "in" vs country code "IN" — match codes only as delimited tokens
 _LOCATION_TOKEN_KEYS = frozenset({"in", "ind"})
 
 
