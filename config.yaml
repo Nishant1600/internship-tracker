@@ -162,6 +162,8 @@ companies:
     - {name: "Altimetrik", ats: "custom-portal", url: "https://altimetrik.ripplehire.com/candidate/?token=SWCslMw2ct8eSm7LyqVb&source=CAREERSITE#list"}
     - {name: "Virtusa", ats: "html", url: "https://virtusa.taleo.net/careersection/ex/jobsearch.ftl", css_selector: "tr.even, tr.odd"}
     - {name: "Mitsogo", ats: "custom-portal", url: "https://careers.mitsogo.com/"}
+    # rebrand: careers.ltimindtree.com no longer resolves; board moved to careers.ltm.com
+    - {name: "LTIMindtree", ats: "html", url: "https://careers.ltm.com/Microsite/content/View-Jobs/", css_selector: "a[href*=\"/Microsite/content/\"][title]", skip_location_filter: true}
 
   medium-easy:
     - {name: "Flipkart", ats: "html", url: "https://www.flipkartcareers.com/jobslist", css_selector: "div.job-card"}
@@ -398,6 +400,9 @@ companies:
     # public careers page only renders a handful of featured roles; Engineering view
     # is the one that carries the SWE/graduate/intern programmes
     - {name: "Revolut", ats: "html", url: "https://www.revolut.com/careers/?team=Engineering", css_selector: "a[href*='/careers/position/']"}
+    # f_C=1337 is LinkedIn's own company id; old seeMoreJobPostings API is gone
+    - {name: "LinkedIn", ats: "linkedin", url: "https://www.linkedin.com/jobs/search/?f_C=1337"}
+    - {name: "Spotify", ats: "lever", url: "https://api.lever.co/v0/postings/spotify?mode=json"}
 
   hard:
     - {name: "DE Shaw", ats: "custom-portal", url: "https://www.deshaw.com/careers", skip_location_filter: true}
@@ -430,3 +435,9 @@ companies:
     - {name: "Jane Street", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/janestreet/jobs?content=true", skip_location_filter: true}
     - {name: "DRW", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/drweng/jobs?content=true", skip_location_filter: true}
     - {name: "PEAK6", ats: "html", url: "https://peak6.com/careers/", css_selector: "li.sui-result", skip_location_filter: true}
+    # restored: boards reachable again (old careers.bloomberg.com / gravitontrading /
+    # versor-inv.com URLs all dead); these boards carry real locations so the
+    # India city filter applies — no skip_location_filter
+    - {name: "Bloomberg", ats: "html", url: "https://bloomberg.avature.net/careers/SearchJobs", css_selector: "article.article--result"}
+    - {name: "Graviton Research Capital", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gravitonresearchcapital/jobs?content=true"}
+    - {name: "Versor Investments", ats: "html", url: "https://www.versorinvest.com/careers/", css_selector: "div.job-col"}
