@@ -191,6 +191,12 @@ class TelegramNotifier(Notifier):
             return False
         return True
 
+    @property
+    def configured(self) -> bool:
+        """True when a real Telegram channel exists (log-only mode returns False)."""
+        self._load_secrets()
+        return bool(self._config.enabled and self._bot_token and self._chat_id)
+
     async def _send_messages(self, messages: list[str]) -> bool:
         """Send one or more messages to Telegram, logging any that fail."""
         if not self._check_config():
@@ -198,20 +204,20 @@ class TelegramNotifier(Notifier):
                 logger.info("Telegram message:\n%s", msg)
             return False
 
-        bot = Bot(token=self._bot_token)
         sent_any = False
-        for msg in messages:
-            if not msg.strip():
-                continue
-            try:
-                await bot.send_message(
-                    chat_id=self._chat_id,
-                    text=msg,
-                    disable_web_page_preview=True,
-                )
-                sent_any = True
-            except TelegramError as e:
-                logger.error("Failed to send Telegram message: %s", e)
+        async with Bot(token=self._bot_token) as bot:
+            for msg in messages:
+                if not msg.strip():
+                    continue
+                try:
+                    await bot.send_message(
+                        chat_id=self._chat_id,
+                        text=msg,
+                        disable_web_page_preview=True,
+                    )
+                    sent_any = True
+                except TelegramError as e:
+                    logger.error("Failed to send Telegram message: %s", e)
         return sent_any
 
     async def send_tier_digest(

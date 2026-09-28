@@ -17,7 +17,7 @@ from tracker.logger import get_logger, setup_logging
 from tracker.models import Job
 from tracker.notifiers.telegram import TelegramNotifier
 from tracker.scheduler import run_scheduler
-from tracker.scrapers import get_scraper
+from tracker.scrapers import SCRAPERS, get_scraper
 
 load_dotenv()
 
@@ -458,19 +458,22 @@ async def run_check_links(config_path: str) -> int:
         )
         return 1
 
-    save_snapshot(report)
     if newly_broken or recovered:
-        sent = await TelegramNotifier(config.telegram).send_alert(
+        notifier = TelegramNotifier(config.telegram)
+        sent = await notifier.send_alert(
             "🔗 Link health alert",
             format_alert(report, newly_broken, recovered),
         )
-        if not sent:
+        if not sent and notifier.configured:
+            # don't commit the transition: the alert would be lost forever.
+            # log-only mode (configured=False) already delivered to the log.
             logger.error(
-                "Link alert not delivered; state was recorded, so only further "
-                "state changes will alert again"
+                "Link alert not delivered; snapshot not updated — will retry next run"
             )
-        for name in newly_broken:
-            print(f"✗ stopped working: {name}")
+            return 1
+    save_snapshot(report)
+    for name in newly_broken:
+        print(f"✗ stopped working: {name}")
     return 1 if newly_broken else 0
 
 
@@ -498,6 +501,11 @@ def check_config(config_path: str) -> int:
                 seen_names[key] = tier_name
             if c.ats == "html" and not c.css_selector:
                 errors.append(f"[{tier_name}] {c.name}: ats 'html' requires css_selector")
+            if c.ats.lower() not in SCRAPERS:
+                errors.append(
+                    f"[{tier_name}] {c.name}: ats '{c.ats}' has no scraper "
+                    "(company would be silently skipped)"
+                )
             if not c.url.startswith(("http://", "https://")):
                 errors.append(f"[{tier_name}] {c.name}: url must be http(s), got '{c.url}'")
 

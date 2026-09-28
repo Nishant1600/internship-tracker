@@ -40,6 +40,52 @@ def test_diff_baseline_and_new_companies_are_silent():
     assert diff_states({"a": "ok"}, {"a": "ok", "new": "dead"}) == ([], [])
 
 
+def test_snapshot_saved_only_when_alert_delivered(monkeypatch):
+    """The ok->dead transition must not be committed if the alert never went out,
+    or it is lost forever; log-only mode counts as delivered."""
+    import asyncio
+    from unittest.mock import AsyncMock, MagicMock
+
+    import main
+
+    report = {
+        "total": 1,
+        "results": {
+            "X": {"state": "dead", "status": None, "error": "boom", "tier": "easy", "url": "https://x"}
+        },
+        "counts": {"ok": 0, "dead": 1, "blocked": 0},
+    }
+    monkeypatch.setattr(main, "load_config", MagicMock())
+    monkeypatch.setattr(
+        "tracker.link_health.check_links", AsyncMock(return_value=report)
+    )
+    monkeypatch.setattr(
+        "tracker.link_health.load_snapshot", MagicMock(return_value={"X": "ok"})
+    )
+    save = MagicMock()
+    monkeypatch.setattr("tracker.link_health.save_snapshot", save)
+    notifier = MagicMock()
+    notifier.configured = True
+    notifier.send_alert = AsyncMock(return_value=True)
+    monkeypatch.setattr(main, "TelegramNotifier", MagicMock(return_value=notifier))
+
+    # delivered -> transition committed
+    assert asyncio.run(main.run_check_links("cfg.yaml")) == 1  # broken link
+    save.assert_called_once()
+
+    # delivery failed with a real channel -> NOT committed, retried next run
+    save.reset_mock()
+    notifier.send_alert = AsyncMock(return_value=False)
+    assert asyncio.run(main.run_check_links("cfg.yaml")) == 1
+    save.assert_not_called()
+
+    # log-only mode -> alert printed to log, commit anyway
+    notifier.configured = False
+    save.reset_mock()
+    asyncio.run(main.run_check_links("cfg.yaml"))
+    save.assert_called_once()
+
+
 def test_format_alert_lists_broken_with_url():
     report = {
         "total": 3,

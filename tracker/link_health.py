@@ -117,34 +117,48 @@ async def _confirm_with_browser(pending: list[dict], timeout: float) -> None:
             len(pending),
         )
         return
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(
-            headless=True, args=["--disable-blink-features=AutomationControlled", "--no-sandbox"]
-        )
-        try:
-            context = await browser.new_context(user_agent=BROWSER_UA)
-            for rec in pending:
-                # one bad page must not abort the confirmation of the rest
-                try:
-                    page = await context.new_page()
+    try:
+        async with async_playwright() as pw:
+            browser = await pw.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
+            )
+            try:
+                context = await browser.new_context(user_agent=BROWSER_UA)
+                for rec in pending:
+                    # one bad page must not abort the confirmation of the rest
                     try:
-                        resp = await page.goto(
-                            rec["url"], timeout=int(timeout * 1000), wait_until="domcontentloaded"
+                        page = await context.new_page()
+                        try:
+                            resp = await page.goto(
+                                rec["url"],
+                                timeout=int(timeout * 1000),
+                                wait_until="domcontentloaded",
+                            )
+                            status = resp.status if resp else None
+                        finally:
+                            await page.close()
+                        if status and status < 400:
+                            rec.update(state="ok", status=status, error=None)
+                        elif status:
+                            rec.update(status=status, state=classify(status, None))
+                    except Exception as e:
+                        rec["browser_error"] = str(e)[:120]
+                        logger.warning(
+                            "Browser confirm failed for %s: %s",
+                            rec["name"],
+                            rec["browser_error"],
                         )
-                        status = resp.status if resp else None
-                    finally:
-                        await page.close()
-                    if status and status < 400:
-                        rec.update(state="ok", status=status, error=None)
-                    elif status:
-                        rec.update(status=status, state=classify(status, None))
-                except Exception as e:
-                    rec["browser_error"] = str(e)[:120]
-                    logger.warning(
-                        "Browser confirm failed for %s: %s", rec["name"], rec["browser_error"]
-                    )
-        finally:
-            await browser.close()
+            finally:
+                await browser.close()
+    except Exception as e:
+        # launch failure (browser not installed, sandbox issues) must not kill
+        # the whole check — pending links stay at their HTTP verdict
+        logger.warning(
+            "Browser confirmation unavailable (%s); %d links left at HTTP status",
+            e,
+            len(pending),
+        )
 
 
 async def check_links(config, timeout: float = PROBE_TIMEOUT) -> dict:

@@ -17,7 +17,10 @@ from typing import AsyncIterator, Any
 import httpx
 
 from tracker.config import CompanyConfig, ScraperConfig
+from tracker.logger import get_logger
 from tracker.models import RawJob
+
+logger = get_logger()
 from tracker.scrapers.base import BaseScraper
 
 
@@ -43,7 +46,15 @@ class AshbyScraper(BaseScraper):
                     f"https://api.ashbyhq.com/posting-api/job-board/{board}"
                 )
                 if resp.status_code == 200:
-                    for p in resp.json().get("jobs") or []:
+                    data = resp.json()
+                    jobs = data.get("jobs") if isinstance(data, dict) else None
+                    if jobs is None:
+                        logger.warning(
+                            "Ashby board %s: unexpected feed shape (no 'jobs' key)",
+                            board,
+                        )
+                        jobs = []
+                    for p in jobs:
                         parsed = self._parse_posting(p)
                         if parsed:
                             yield parsed

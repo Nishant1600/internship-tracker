@@ -19,7 +19,10 @@ def _list_match(text: str | None, keywords: list[str], *, prefix: bool = False) 
         return False
     text_lower = text.lower()
     for kw in keywords:
-        pattern = re.compile(r"\b" + re.escape(kw.lower()) + ("" if prefix else r"\b"))
+        # prefix only helps multi-word stems ("software engineer" -> engineering);
+        # single words keep both boundaries so \bai misses "Air"
+        suffix = "" if (prefix and " " in kw) else r"\b"
+        pattern = re.compile(r"\b" + re.escape(kw.lower()) + suffix)
         if pattern.search(text_lower):
             return True
     return False
@@ -128,8 +131,15 @@ def _check_grad_year(title: str, description: str | None, allowed_years: list[Op
     found_years = set()
     for match in GRAD_YEAR_PATTERN.finditer(combined):
         year = int(match.group(1))
-        if floor <= year <= 2040:
-            found_years.add(year)
+        if year > 2040:
+            continue
+        if year < floor:
+            # grad-context year below the cohort floor ("Class of 2025") is a
+            # real mismatch; a bare year is noise (founding dates, ranges)
+            if match.group(0) != match.group(1):
+                return False
+            continue
+        found_years.add(year)
     if not found_years:
         return None in allowed_years
     for y in found_years:

@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime, timezone, timedelta
 
 from tracker.config import FiltersConfig, FilterList
-from tracker.filters import check_job_filters
+from tracker.filters import _list_match, check_job_filters
 from tracker.models import RawJob
 
 
@@ -181,6 +181,33 @@ class TestGradYearFilter:
         job = make_job(description="Graduation year 2027 or 2028")
         ok, _ = check_job_filters(job, cfg)
         assert ok is True
+
+    def test_rejects_grad_context_year_below_floor(self):
+        # floor is 2026 (min allowed - 1); an explicit old class year must
+        # not fall through to "no year found -> None allowed -> pass"
+        cfg = make_config(allowed_grad_years=[2027, 2028, 2029, None])
+        for text in ("Class of 2025 graduates", "graduating 2023"):
+            job = make_job(description=text)
+            ok, _ = check_job_filters(job, cfg)
+            assert ok is False, text
+
+    def test_ignores_bare_stale_year(self):
+        cfg = make_config(allowed_grad_years=[2027, 2028, 2029, None])
+        job = make_job(description="Company founded in 2015")
+        ok, _ = check_job_filters(job, cfg)
+        assert ok is True
+
+
+class TestListMatchPrefix:
+    def test_single_word_keyword_keeps_boundaries(self):
+        assert _list_match("Air Quality Intern", ["ai"], prefix=True) is False
+        assert _list_match("AI Engineer Intern", ["ai"], prefix=True) is True
+
+    def test_multiword_keyword_still_stems(self):
+        assert (
+            _list_match("Software Engineering Intern", ["software engineer"], prefix=True)
+            is True
+        )
 
 
 class TestMaxAgeFilter:
