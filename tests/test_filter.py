@@ -248,12 +248,13 @@ class TestEdgeCases:
         assert ok is False
         assert "Location not in include list" in reasons
 
-    def test_us_remote_still_passes_remote_keyword(self):
-        # Documented leak of the current include list: "Remote" matches anywhere.
+    def test_us_remote_rejected_by_remote_keyword(self):
+        # "Remote" alone passes, but a token outside the include vocabulary must not.
         cfg = make_config(locations=FilterList(include=["india", "remote"], exclude=[]))
-        job = make_job(location="US Remote")
-        ok, _ = check_job_filters(job, cfg)
-        assert ok is True
+        assert check_job_filters(make_job(location="US Remote"), cfg)[0] is False
+        assert check_job_filters(make_job(location="Remote, Europe"), cfg)[0] is False
+        assert check_job_filters(make_job(location="Remote"), cfg)[0] is True
+        assert check_job_filters(make_job(location="Remote, India"), cfg)[0] is True
 
     def test_empty_description(self):
         cfg = make_config()
