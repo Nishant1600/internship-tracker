@@ -67,7 +67,7 @@ class HTMLFallbackScraper(BaseScraper):
                     pass
 
                 seen = set()
-                max_pages = 10
+                max_pages = 20  # loop exits as soon as a page has no Next; 20 covers EA's 336 results @20/page
                 total_jobs = 0
 
                 for page_num in range(1, max_pages + 1):
@@ -88,7 +88,11 @@ class HTMLFallbackScraper(BaseScraper):
                                 total_jobs += 1
                                 yield parsed
 
-                    next_btn = await page.query_selector('button:has-text("Go to next page"), button:has-text("Next")')
+                    # EA's portal paginates with <a class="...paginationNextLink">Next >></a>
+                    next_btn = await page.query_selector(
+                        'button:has-text("Go to next page"), button:has-text("Next"), '
+                        'a[class*="paginationNext"], a:has-text("Next >>")'
+                    )
                     if not next_btn:
                         break
 
@@ -127,7 +131,9 @@ class HTMLFallbackScraper(BaseScraper):
         if not title:
             return None
 
-        location = await self._get_text(card, ".location, .job-location, [data-location]")
+        location = await self._get_text(
+            card, ".location, .job-location, [data-location], [data-ui='job-location']"
+        )
         if location:
             location = location.replace("Location :", "").replace("Location:", "").strip()
         if not location:
@@ -174,8 +180,9 @@ class HTMLFallbackScraper(BaseScraper):
                 lines = [l.strip() for l in (await card.inner_text()).strip().split("\n") if l.strip()]
                 skip_texts = {"Apply now", "Apply", "View Details", "APPLY NOW", "Click to view→", "Click to view", "Intern", "Full-Time", "Part-Time", "Contract", "Temporary", "APPLY", "SHARE", "- Onsite", "- Remote", "- Hybrid", "Onsite", "Remote", "Hybrid"}
                 # Try to find location - check all lines, not just after line 2
+                # "apply" never is: HRT cards put "↳ APPLY NOW" above the location line
                 for line in lines[1:]:
-                    if line not in skip_texts and not line.startswith("Full-time") and not line.startswith("Part-time") and not line.startswith("Job ID:") and not line.startswith("1\xa0") and not re.match(r'\d+\s*-\s*\d+\s*Years', line) and not re.match(r'^[\u2022\-\*]\s', line):
+                    if line not in skip_texts and "apply" not in line.lower() and not line.startswith("Full-time") and not line.startswith("Part-time") and not line.startswith("Job ID:") and not line.startswith("1\xa0") and not re.match(r'\d+\s*-\s*\d+\s*Years', line) and not re.match(r'^[\u2022\-\*]\s', line):
                         location = line
                         break
             except Exception:

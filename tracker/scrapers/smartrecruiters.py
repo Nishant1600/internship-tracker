@@ -85,7 +85,18 @@ class SmartRecruitersScraper(BaseScraper):
             description = "\n\n".join(sections_text) if sections_text else None
 
         date_posted = str(posting.get("postedDate") or posting.get("createdDate") or "").strip() or None
-        absolute_url = str(posting.get("url") or posting.get("applyUrl") or "").strip() or None
+
+        # The public API sets neither `url` nor `applyUrl` — build the public job
+        # page from company identifier + posting id, fall back to the API permalink.
+        absolute_url = str(posting.get("url") or posting.get("applyUrl") or "").strip()
+        if not absolute_url:
+            company_obj = posting.get("company")
+            ident = str(company_obj.get("identifier") or "").strip() if isinstance(company_obj, dict) else ""
+            pid = str(posting.get("id") or "").strip()
+            if ident and pid:
+                absolute_url = f"https://jobs.smartrecruiters.com/{ident}/{pid}"
+        if not absolute_url:
+            absolute_url = str(posting.get("ref") or "").strip()
 
         return RawJob(
             company=self.company,

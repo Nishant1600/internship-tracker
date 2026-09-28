@@ -2,6 +2,12 @@ schedule:
   time: "08:00"
   timezone: "Asia/Kolkata"
 
+link_check:
+  # probes every company URL daily before the pipeline run and Telegram-alerts
+  # only links whose state changed since the previous check
+  enabled: true
+  time: "07:30"
+
 database:
   path: "./data/jobs.db"
 
@@ -24,9 +30,10 @@ filters:
       - "winter intern"
       - "research intern"
       - "co-op"
-      - "virtual"
-      - "challenge"
       - "fellowship"
+    # 'virtual' and 'challenge' removed: role_keywords.include also searches the
+    # job description, where those words appear in ordinary prose ('challenging
+    # work', 'virtual teams') and let full-time jobs through — 7 of 17 matches.
     exclude:
       - "senior"
       - "lead"
@@ -97,10 +104,10 @@ filters:
       - "usa only"
       - "united states only"
   employment_types:
-    include:
-      - "intern"
-      - "internship"
-      - "contract"
+    # include left empty: real internships ship as 'full time'/'Full Time Employee',
+    # so an include list rejected them (8/95 live internship postings). Role and
+    # title keywords already gate the role; exclude still drops 'full-time' types.
+    include: []
     exclude:
       - "full-time"
   allowed_grad_years:
@@ -123,18 +130,14 @@ aggregator_feeds:
   enabled: true
   max_posting_age_days: 3
   sources:
-    - name: "speedyapply-2026-SWE"
-      url: "https://raw.githubusercontent.com/speedyapply/2026-SWE-College-Jobs/main/README.md"
-      batch_years: [2026, 2027]
+    # 2026-* feeds were byte-identical mirrors of the 2027 ones — dropped as duplicates
     - name: "speedyapply-2027-SWE"
       url: "https://raw.githubusercontent.com/speedyapply/2027-SWE-College-Jobs/main/README.md"
       batch_years: [2027, 2028, 2029]
-    - name: "speedyapply-2026-AI"
-      url: "https://raw.githubusercontent.com/speedyapply/2026-AI-College-Jobs/main/README.md"
-      batch_years: [2026, 2027]
     - name: "speedyapply-2027-AI"
       url: "https://raw.githubusercontent.com/speedyapply/2027-AI-College-Jobs/main/README.md"
       batch_years: [2027, 2028, 2029]
+
 
 companies:
   easy:
@@ -144,7 +147,6 @@ companies:
     - {name: "Cognizant", ats: "phenompeople", url: "https://careers.cognizant.com/india-en/jobs/"}
     - {name: "Tech Mahindra", ats: "custom-portal", url: "https://careers.techmahindra.com/"}
     - {name: "Accenture", ats: "custom-portal", url: "https://www.accenture.com/in-en/careers/jobsearch"}
-    - {name: "LTIMindtree", ats: "successfactors", url: "https://careers.ltimindtree.com/search/"}
     - {name: "Deloitte", ats: "successfactors", url: "https://southasiacareers.deloitte.com/go/Deloitte-India/718244/"}
     - {name: "EY", ats: "successfactors", url: "https://careers.ey.com/ey/search/?q=&sortColumn=referencedate&sortDirection=desc"}
     - {name: "PwC", ats: "workday", url: "https://pwc.wd3.myworkdayjobs.com/en-US/Global_Experienced_Careers?locations=e57e6863118d0192617a4988342ba4c7&locations=e57e6863118d01cf86b0d379342bfab4&locations=4286c2c7092210052a2351a32a610000&locations=e57e6863118d01c0b8b9ff87342b40c7&locations=e57e6863118d01e1230f4288342b9ac7&locations=e57e6863118d0101d840b17a342b30b6&locations=e57e6863118d011ca7026188342bbdc7&locations=e57e6863118d01def7f26488342bc2c7&locations=4b594efa2b6c01cfc90002b5270301c1&locations=940aeee8122c10252fa9c85157880000&locations=3761ae88335410044688ff7c6b3a0000&locations=6fedfc4a010d10044688ee900a7c0000&locations=e57e6863118d011c2d21d779342bffb4&locations=351cca8db89f101a78acb2ea6c5f0000&locations=1253f47a256c101dc7c54d7832430000&locations=654a31e587e4016effd02a459109a45e&locations=e57e6863118d01b854445d88342bb8c7&locations=e57e6863118d01be5ed2aa7a342b26b6&locations=480ed971333f01ac180c364b7b21c8de&locations=d3d4fd4264d2101d8cfff7a82dbe0000&locations=e57e6863118d013a81f1f387342b31c7&locations=e57e6863118d0159272aef87342b2cc7&locations=f4872aacb3ee012f05fd8850b22c3f40&locations=e57e6863118d0143538d8d89342b5dc9&locations=e57e6863118d013f3b2da177342bcbb1&locations=393a0869abd710143a2beaf60b670000&locations=e57e6863118d01c26419ae7a342b2bb6&locations=606b09f912311013e7b7a6099f390000&locations=a0186028715c01af7a61e2a26c4feaea&locations=e57e6863118d01c9b91fc587342becc6&locations=e57e6863118d01c410d0a777342bd5b1&locations=e57e6863118d0160ef6ca477342bd0b1&jobFamilyGroup=e57e6863118d013fefc98f45202b3268&jobFamilyGroup=ddb55b48949a101442808313d3b50000&jobFamilyGroup=e57e6863118d01cbe567ba45202b4868&jobFamilyGroup=fcc2b0980c4d1014427ed0de08fe0000&jobFamilyGroup=83dadf5ea2a310144280a2bc558e0000&jobFamilyGroup=e57e6863118d01f55f7ac146202bd268&jobFamilyGroup=b38cfc0f829110144280fa7cb7390000&jobFamilyGroup=e57e6863118d01c19fd3a246202bc268&jobFamilyGroup=e57e6863118d011b6b3b9f46202bc068&jobFamilyGroup=e57e6863118d015bf85e9746202bbc68&jobFamilyGroup=e57e6863118d01deb68d8746202bb468&jobFamilyGroup=04badc06c37d10144281912ba28d0000&jobFamilyGroup=0a2ccbf2ea4f10144282135872450000&jobFamilyGroup=e57e6863118d01f05fba5646202b9a68&jobFamilyGroup=e57e6863118d015d81424046202b8e68&jobFamilyGroup=e57e6863118d014b76cf0946202b7268&jobFamilyGroup=e57e6863118d01d369ceea45202b6268&jobFamilyGroup=4a582d47bc181014427f60f9cf010000&jobFamilyGroup=e57e6863118d0128b509be45202b4a68"}
@@ -161,7 +163,6 @@ companies:
     - {name: "Flipkart", ats: "html", url: "https://www.flipkartcareers.com/jobslist", css_selector: "div.job-card"}
     - {name: "Meesho", ats: "lever", url: "https://api.lever.co/v0/postings/meesho?mode=json"}
     - {name: "Swiggy", ats: "swiggy", url: "https://careers.swiggy.com/"}
-    - {name: "PhonePe", ats: "greenhouse", url: "https://job-boards.greenhouse.io/phonepe"}
     - {name: "CRED", ats: "lever", url: "https://api.lever.co/v0/postings/cred?mode=json"}
     - {name: "Razorpay", ats: "greenhouse", url: "https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited"}
     - {name: "Nykaa", ats: "html", url: "https://careers.nykaa.com/", css_selector: "div.p-5 > div.w-full"}
@@ -185,11 +186,12 @@ companies:
     - {name: "Smallcase", ats: "html", url: "https://smallcase.freshteam.com/jobs", css_selector: "a[href*='/jobs/']"}
     - {name: "Jar", ats: "html", url: "https://changejar.applytojob.com/apply/", css_selector: "a[href*='/apply/']"}
     - {name: "Fi Money", ats: "lever", url: "https://api.lever.co/v0/postings/epifi?mode=json"}
+    # restored: GH board 404 → Apollo feed
+    - {name: "PhonePe", ats: "custom-api", url: "https://www.phonepe.com/apollo/job-postings/latest.json"}
 
   medium-1:
     - {name: "Adobe", ats: "workday", url: "https://adobe.wd5.myworkdayjobs.com/external_experienced?locationCountry=c4f78be1a8f14da0ab49ce1162348a5e"}
     - {name: "Intuit", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/Intuit2/postings"}
-    - {name: "Walmart Labs", ats: "walmart", url: "https://indiacareers.walmartlabs.com/content/globaltechindia/en_in/results.html"}
     - {name: "Atlassian", ats: "atlassian", url: "https://join.atlassian.com/api/jobs"}
     - {name: "PayPal", ats: "eightfold", url: "https://paypal.eightfold.ai/careers?domain=paypal.com&location=India"}
     - {name: "Visa", ats: "workday", url: "https://visa.wd5.myworkdayjobs.com/Visa?locationCountry=c4f78be1a8f14da0ab49ce1162348a5e"}
@@ -223,8 +225,9 @@ companies:
     - {name: "UBS", ats: "talentlink", url: "https://jobs.ubs.com/TGnewUI/Search/home/Home?partnerid=25008&siteid=5012&PageType=searchResults&SearchType=linkquery&LinkID=6557"}
     - {name: "Societe Generale", ats: "custom-portal", url: "https://careers.societegenerale.com/"}
     - {name: "AMD", ats: "amd", url: "https://careers.amd.com/careers-home/jobs"}
-    - {name: "Akamai", ats: "oracle", url: "https://jobs.akamai.com/en/sites/CX_1/jobs?mode=location"}
-    - {name: "Arista Networks", ats: "arista", url: "https://www.arista.com/en/careers"}
+    # health check targets the SmartRecruiters API the scraper actually calls;
+    # the public /en/careers page sits behind an Akamai challenge (406 to httpx)
+    - {name: "Arista Networks", ats: "arista", url: "https://www.smartrecruiters.com/job-api/public/search/widgets/AristaNetworks/postings"}
     - {name: "Juniper Networks", ats: "hpe", url: "https://careers.hpe.com/us/en/search-results?keywords=Juniper"}
     - {name: "Nokia", ats: "oracle", url: "https://jobs.nokia.com/en/sites/CX_1/jobs?location=India&locationLevel=country&mode=location"}
     - {name: "Bosch", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings"}
@@ -297,7 +300,6 @@ companies:
     - {name: "Amazon", ats: "custom-api", url: "https://www.amazon.jobs/en/search.json"}
     - {name: "Meta", ats: "meta", url: "https://www.metacareers.com/jobsearch/"}
     - {name: "Apple", ats: "custom-portal", url: "https://jobs.apple.com/en-in/search"}
-    - {name: "LinkedIn", ats: "custom-portal", url: "https://www.linkedin.com/jobs/api/seeMoreJobPostings"}
     - {name: "Uber", ats: "html", url: "https://jobs.uber.com/en/jobs/?radius=100&team=Engineer", css_selector: "a[href*='/en/jobs/']"}
     - {name: "Grab", ats: "html", url: "https://www.grab.careers/en/jobs/?search=&country=India&pagesize=20", css_selector: "div.card.card-job"}
     - {name: "Stripe", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/stripe/jobs?content=true"}
@@ -320,22 +322,12 @@ companies:
     - {name: "Brex", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/brex/jobs?content=true"}
     - {name: "Chime", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/chime/jobs?content=true"}
     - {name: "SoFi", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/sofi/jobs?content=true"}
-    - {name: "Rippling", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/rippling/jobs?content=true"}
     - {name: "Gusto", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gusto/jobs?content=true"}
     - {name: "Ripple", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/ripple/jobs?content=true"}
-    - {name: "Revolut", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/revolut/jobs?content=true"}
-    - {name: "Wise", ats: "custom-api", url: "https://api.wise.jobs/v1/postings"}
-    - {name: "Remitly", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/remitly/jobs?content=true"}
     - {name: "Waymo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/waymo/jobs?content=true"}
-    - {name: "Cruise", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/getcruise/jobs?content=true"}
-    - {name: "Aurora", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/aurora/jobs?content=true"}
     - {name: "Rivian", ats: "custom-portal", url: "https://careers.rivian.com/"}
     - {name: "Nuro", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/nuro/jobs?content=true"}
-    - {name: "Pony.ai", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/ponyai/jobs?content=true"}
-    - {name: "TuSimple", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/tusimple/jobs?content=true"}
     - {name: "Nvidia", ats: "workday", url: "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite?locationHierarchy1=2fcb99c455831013ea52b82135ba3266"}
-    - {name: "Anduril", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/anduriltechnologies/jobs?content=true"}
-    - {name: "Palantir", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/palantir/jobs?content=true"}
     - {name: "Scale AI", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/scaleai/jobs?content=true"}
     - {name: "OpenAI", ats: "openai", url: "https://openai.com/careers/search/"}
     - {name: "Anthropic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/anthropic/jobs?content=true"}
@@ -345,80 +337,92 @@ companies:
     - {name: "Snap", ats: "custom-portal", url: "https://careers.snap.com/jobs?location=Mumbai"}
     - {name: "Twitch", ats: "custom-portal", url: "https://www.twitch.tv/jobs"}
     - {name: "Roblox", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/roblox/jobs?content=true"}
-    - {name: "Unity", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/unity3d/jobs?content=true"}
-    - {name: "Electronic Arts", ats: "custom-api", url: "https://ea.gr8people.com/index.external.html"}
     - {name: "Riot Games", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/riotgames/jobs?content=true"}
-    - {name: "Niantic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/niantic/jobs?content=true"}
-    - {name: "Spotify", ats: "custom-portal", url: "https://api-partner.spotify.com/pathfinder/v1/query"}
     - {name: "Instacart", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/instacart/jobs?content=true"}
     - {name: "Lyft", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/lyft/jobs?content=true"}
     - {name: "Toast", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/toast/jobs?content=true"}
-    - {name: "Compass", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/compass/jobs?content=true"}
-    - {name: "Opendoor", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/opendoor/jobs?content=true"}
-    - {name: "Houzz", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/houzz/jobs?content=true"}
     - {name: "Poshmark", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/poshmark/jobs?content=true"}
     - {name: "Faire", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/faire/jobs?content=true"}
-    - {name: "Whatnot", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/whatnot/jobs?content=true"}
     - {name: "MongoDB", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/mongodb/jobs?content=true"}
     - {name: "Elastic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/elastic/jobs?content=true"}
     - {name: "Notion", ats: "notion", url: "https://www.notion.com/careers"}
-    - {name: "Miro", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/miro/jobs?content=true"}
     - {name: "Figma", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/figma/jobs?content=true"}
-    - {name: "Loom", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/loom/jobs?content=true"}
-    - {name: "Grammarly", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/grammarly/jobs?content=true"}
     - {name: "Otter.ai", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/otterai/jobs?content=true"}
-    - {name: "Moveworks", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/moveworks/jobs?content=true"}
-    - {name: "Harness", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/harness/jobs?content=true"}
-    - {name: "Clari", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/clari/jobs?content=true"}
     - {name: "Braze", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/braze/jobs?content=true"}
     - {name: "Attentive", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/attentive/jobs?content=true"}
-    - {name: "Criteo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/criteo/jobs?content=true"}
-    - {name: "LiveRamp", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/liveramp/jobs?content=true"}
     - {name: "Moloco", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/moloco/jobs?content=true"}
     - {name: "AppDynamics", ats: "custom-portal", url: "https://www.appdynamics.com/company/careers"}
     - {name: "Dynatrace", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/Dynatrace/postings"}
-    - {name: "ThousandEyes", ats: "custom-portal", url: "https://www.thousandeyes.com/careers"}
-    - {name: "Catchpoint", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/catchpoint/jobs?content=true"}
     - {name: "New Relic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/newrelic/jobs?content=true"}
     - {name: "Coupang", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/coupang/jobs?content=true"}
     - {name: "Mercari", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/mercari/jobs?content=true"}
-    - {name: "Zalando", ats: "custom-portal", url: "https://jobs.zalando.com/api/jobs"}
     - {name: "Bolt", ats: "html", url: "https://bolt.eu/en/careers/positions", css_selector: "h3"}
-    - {name: "Gojek", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gojek/jobs?content=true"}
     - {name: "Careem", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/careem/jobs?content=true"}
-    - {name: "Airwallex", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/airwallex/jobs?content=true"}
     - {name: "OKX", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/okx/jobs?content=true"}
     - {name: "BitGo", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/bitgo/jobs?content=true"}
-    - {name: "Circle", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/circle/jobs?content=true"}
     - {name: "Gemini", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gemini/jobs?content=true"}
+    # --- restored companies: dead Greenhouse 404s replaced with current boards ---
+    - {name: "Wise", ats: "smartrecruiters", url: "https://api.smartrecruiters.com/v1/companies/wise/postings"}
+    - {name: "Remitly", ats: "html", url: "https://careers.remitly.com/job-search-results/", css_selector: "div.jobTitle"}
+    - {name: "Aurora", ats: "custom-api", url: "https://aurora.tech/api/jobs-index"}
+    - {name: "Pony.ai", ats: "html", url: "https://apply.workable.com/pony-dot-ai/", css_selector: "div:has(> a[href*='/j/'])"}
+    - {name: "Anduril", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/andurilindustries/jobs?content=true"}
+    - {name: "Palantir", ats: "lever", url: "https://api.lever.co/v0/postings/palantir?mode=json"}
+    - {name: "Unity", ats: "workday", url: "https://unitytech.wd1.myworkdayjobs.com/Unity"}
+    - {name: "Niantic", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/scopely/jobs?content=true"}
+    - {name: "Compass", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/urbancompass/jobs?content=true"}
+    - {name: "Opendoor", ats: "html", url: "https://www.opendoor.com/careers/open-positions", css_selector: "a.grid.gap-4.rounded-3xl"}
+    - {name: "Houzz", ats: "lever", url: "https://api.lever.co/v0/postings/houzz?mode=json"}
+    - {name: "Whatnot", ats: "html", url: "https://jobs.ashbyhq.com/whatnot", css_selector: "div.ashby-job-posting-brief-list"}
+    - {name: "Miro", ats: "ashby", url: "https://api.ashbyhq.com/posting-api/job-board/miro"}
+    # Grammarly's careers moved to Superhuman's Ashby board after the acquisition
+    - {name: "Grammarly (Superhuman)", ats: "ashby", url: "https://api.ashbyhq.com/posting-api/job-board/Superhuman%20Platform%20Inc"}
+    - {name: "Moveworks", ats: "html", url: "https://www.moveworks.com/us/en/company/careers", css_selector: "div.mdc-layout-grid__cell--span-6.cmp-job-listings__job"}
+    - {name: "Harness", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/harnessinc/jobs?content=true"}
+    # Clari acquired Salesloft; hiring runs off Salesloft's board
+    - {name: "Clari (Salesloft)", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/salesloft/jobs?content=true"}
+    - {name: "Criteo", ats: "workday", url: "https://criteo.wd3.myworkdayjobs.com/Criteo_Career_Site"}
+    - {name: "LiveRamp", ats: "workday", url: "https://liveramp.wd5.myworkdayjobs.com/LiveRampCareers"}
+    # Catchpoint merged into LogicMonitor
+    - {name: "Catchpoint (LogicMonitor)", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/logicmonitor/jobs?content=true"}
+    - {name: "Gojek", ats: "html", url: "https://www.gojek.io/careers", css_selector: "a.table-row"}
+    - {name: "Airwallex", ats: "ashby", url: "https://api.ashbyhq.com/posting-api/job-board/airwallex"}
+    - {name: "Circle", ats: "ashby", url: "https://api.ashbyhq.com/posting-api/job-board/circle"}
+    - {name: "Rippling", ats: "html", url: "https://www.rippling.com/careers/open-roles", css_selector: "a.group.flex.items-center.justify-between"}
+    # gr8people feed is Akamai-403; jobs.ea.com (Avature portal) is server-rendered
+    - {name: "Electronic Arts", ats: "html", url: "https://jobs.ea.com/en_US/careers", css_selector: "article.article--result"}
+    # public careers page only renders a handful of featured roles; Engineering view
+    # is the one that carries the SWE/graduate/intern programmes
+    - {name: "Revolut", ats: "html", url: "https://www.revolut.com/careers/?team=Engineering", css_selector: "a[href*='/careers/position/']"}
 
   hard:
     - {name: "DE Shaw", ats: "custom-portal", url: "https://www.deshaw.com/careers", skip_location_filter: true}
-    - {name: "Citadel", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/citadel/jobs?content=true", skip_location_filter: true}
     - {name: "Two Sigma", ats: "custom-portal", url: "https://careers.twosigma.com/careers/OpenRoles", skip_location_filter: true}
-    - {name: "Jane Street", ats: "custom-api", url: "https://www.janestreet.com/careers/jobs.json", skip_location_filter: true}
     - {name: "IMC", ats: "custom-portal", url: "https://careers.imc.com/api/v1/jobs", skip_location_filter: true}
     - {name: "Optiver", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/optiver/jobs?content=true", skip_location_filter: true}
-    - {name: "Hudson River Trading", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/hudsonrivertrading/jobs?content=true", skip_location_filter: true}
     - {name: "Tower Research Capital", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/towerresearchcapital/jobs?content=true", skip_location_filter: true}
     - {name: "Virtu Financial", ats: "greenhouse", url: "https://job-boards.greenhouse.io/virtu", skip_location_filter: true}
     - {name: "Millennium", ats: "custom-portal", url: "https://career.mlp.com/careers?domain=mlp.com&sort_by=relevance&pid=755936615453", skip_location_filter: true}
     - {name: "Millennium Campus", ats: "custom-portal", url: "https://campusjobs.mlp.com/careers?domain=mlp.com&microsite=campus-site", skip_location_filter: true}
     - {name: "Point72", ats: "custom-portal", url: "https://careers.point72.com/?location=bengaluru,%20india", skip_location_filter: true}
     - {name: "AQR Capital", ats: "custom-portal", url: "https://careers.aqr.com/jobs/category/university-jobs?size=n_20_n", skip_location_filter: true}
-    - {name: "Squarepoint Capital", ats: "custom-portal", url: "https://www.squarepoint-capital.com/careers", skip_location_filter: true}
-    - {name: "DRW", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/drw/jobs?content=true", skip_location_filter: true}
+    # /careers 404s since the 2026 site rebuild; listings live under /open-opportunities
+    - {name: "Squarepoint Capital", ats: "html", url: "https://squarepoint-capital.com/open-opportunities", css_selector: "a[href*='opportunity-details'][class*='hover:text-squarepoint-highlighted']", skip_location_filter: true}
     - {name: "Jump Trading", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/jumptrading/jobs?content=true", skip_location_filter: true}
     - {name: "GSA Capital", ats: "custom-portal", url: "https://www.gsacapital.com/careers", skip_location_filter: true}
     - {name: "WorldQuant", ats: "custom-portal", url: "https://www.worldquant.com/career-listing/?location=mumbai-india&department=zz", skip_location_filter: true}
-    - {name: "Graviton Research Capital", ats: "custom-portal", url: "https://gravitontrading.com/careers/", skip_location_filter: true}
     - {name: "Futures First", ats: "custom-portal", url: "https://futuresfirst.com/careers/", skip_location_filter: true}
     - {name: "SIG", ats: "custom-portal", url: "https://careers.sig.com/", skip_location_filter: true}
     - {name: "Trexquant", ats: "custom-portal", url: "https://www.trexquant.com/careers", skip_location_filter: true}
     - {name: "Arcesium", ats: "custom-portal", url: "https://www.arcesium.com/careers/", skip_location_filter: true}
-    - {name: "PEAK6", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/peak6/jobs?content=true", skip_location_filter: true}
-    - {name: "Versor Investments", ats: "html", url: "https://www.versor-inv.com/careers", css_selector: ".position-title", skip_location_filter: true}
     - {name: "G-Research", ats: "custom-portal", url: "https://www.gresearch.co.uk/vacancies/", skip_location_filter: true}
     - {name: "Akuna Capital", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/akunacapital/jobs?content=true", skip_location_filter: true}
     - {name: "IVP", ats: "custom-portal", url: "https://careers.ivp.in/", skip_location_filter: true}
-    - {name: "Bloomberg", ats: "custom-portal", url: "https://careers.bloomberg.com/job/search", skip_location_filter: true}
+    # --- restored hard-tier companies ---
+    # old boards/.../hudsonrivertrading board 404s; listings render client-side
+    # from their hrt-jobs WordPress plugin
+    - {name: "Hudson River Trading", ats: "html", url: "https://www.hudsonrivertrading.com/careers/", css_selector: "div.hrt-card-item", skip_location_filter: true}
+    - {name: "Citadel", ats: "html", url: "https://www.citadelsecurities.com/careers/open-opportunities/", css_selector: "a.careers-listing-card.js-career-card.js-apply-now", skip_location_filter: true}
+    - {name: "Jane Street", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/janestreet/jobs?content=true", skip_location_filter: true}
+    - {name: "DRW", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/drweng/jobs?content=true", skip_location_filter: true}
+    - {name: "PEAK6", ats: "html", url: "https://peak6.com/careers/", css_selector: "li.sui-result", skip_location_filter: true}

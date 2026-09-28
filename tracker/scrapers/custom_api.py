@@ -163,10 +163,16 @@ class CustomAPIScraper(BaseScraper):
         if not title:
             return None
 
-        location = _safe_str(
+        location_raw = (
             item.get("location") or item.get("jobLocation") or
-            item.get("primaryLocation") or item.get("city") or ""
-        ).strip() or None
+            item.get("primaryLocation") or item.get("locations") or
+            item.get("city") or ""
+        )
+        if isinstance(location_raw, list):
+            # feeds like aurora.tech return "locations": [...]; str() would store
+            # the Python repr and break location token matching
+            location_raw = ", ".join(str(v) for v in location_raw)
+        location = _safe_str(location_raw).strip() or None
 
         description = _safe_str(
             item.get("description") or item.get("jobDescription") or
@@ -175,7 +181,7 @@ class CustomAPIScraper(BaseScraper):
 
         url = _safe_str(
             item.get("url") or item.get("jobUrl") or item.get("applyUrl") or
-            item.get("absolute_url") or item.get("hostedUrl") or ""
+            item.get("applyLink") or item.get("absolute_url") or item.get("hostedUrl") or ""
         ).strip()
 
         if not url:
@@ -184,7 +190,7 @@ class CustomAPIScraper(BaseScraper):
                 url = f"{self.url.rstrip('/')}/jobs/{job_id}"
 
         date_posted = _safe_str(
-            item.get("datePosted") or item.get("postedDate") or
+            item.get("datePosted") or item.get("postedDate") or item.get("publishedDate") or
             item.get("createdAt") or item.get("dateCreated") or ""
         ).strip() or None
 
