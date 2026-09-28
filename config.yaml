@@ -62,6 +62,8 @@ filters:
       - "backend"
       - "frontend"
       - "full stack"
+      - "technology consulting"
+      - "ai"
     exclude: []
   locations:
     include:
@@ -149,7 +151,9 @@ companies:
     - {name: "Accenture", ats: "custom-portal", url: "https://www.accenture.com/in-en/careers/jobsearch"}
     - {name: "Deloitte", ats: "successfactors", url: "https://southasiacareers.deloitte.com/go/Deloitte-India/718244/"}
     - {name: "EY", ats: "successfactors", url: "https://careers.ey.com/ey/search/?q=&sortColumn=referencedate&sortDirection=desc"}
-    - {name: "PwC", ats: "workday", url: "https://pwc.wd3.myworkdayjobs.com/en-US/Global_Experienced_Careers?locations=e57e6863118d0192617a4988342ba4c7&locations=e57e6863118d01cf86b0d379342bfab4&locations=4286c2c7092210052a2351a32a610000&locations=e57e6863118d01c0b8b9ff87342b40c7&locations=e57e6863118d01e1230f4288342b9ac7&locations=e57e6863118d0101d840b17a342b30b6&locations=e57e6863118d011ca7026188342bbdc7&locations=e57e6863118d01def7f26488342bc2c7&locations=4b594efa2b6c01cfc90002b5270301c1&locations=940aeee8122c10252fa9c85157880000&locations=3761ae88335410044688ff7c6b3a0000&locations=6fedfc4a010d10044688ee900a7c0000&locations=e57e6863118d011c2d21d779342bffb4&locations=351cca8db89f101a78acb2ea6c5f0000&locations=1253f47a256c101dc7c54d7832430000&locations=654a31e587e4016effd02a459109a45e&locations=e57e6863118d01b854445d88342bb8c7&locations=e57e6863118d01be5ed2aa7a342b26b6&locations=480ed971333f01ac180c364b7b21c8de&locations=d3d4fd4264d2101d8cfff7a82dbe0000&locations=e57e6863118d013a81f1f387342b31c7&locations=e57e6863118d0159272aef87342b2cc7&locations=f4872aacb3ee012f05fd8850b22c3f40&locations=e57e6863118d0143538d8d89342b5dc9&locations=e57e6863118d013f3b2da177342bcbb1&locations=393a0869abd710143a2beaf60b670000&locations=e57e6863118d01c26419ae7a342b2bb6&locations=606b09f912311013e7b7a6099f390000&locations=a0186028715c01af7a61e2a26c4feaea&locations=e57e6863118d01c9b91fc587342becc6&locations=e57e6863118d01c410d0a777342bd5b1&locations=e57e6863118d0160ef6ca477342bd0b1&jobFamilyGroup=e57e6863118d013fefc98f45202b3268&jobFamilyGroup=ddb55b48949a101442808313d3b50000&jobFamilyGroup=e57e6863118d01cbe567ba45202b4868&jobFamilyGroup=fcc2b0980c4d1014427ed0de08fe0000&jobFamilyGroup=83dadf5ea2a310144280a2bc558e0000&jobFamilyGroup=e57e6863118d01f55f7ac146202bd268&jobFamilyGroup=b38cfc0f829110144280fa7cb7390000&jobFamilyGroup=e57e6863118d01c19fd3a246202bc268&jobFamilyGroup=e57e6863118d011b6b3b9f46202bc068&jobFamilyGroup=e57e6863118d015bf85e9746202bbc68&jobFamilyGroup=e57e6863118d01deb68d8746202bb468&jobFamilyGroup=04badc06c37d10144281912ba28d0000&jobFamilyGroup=0a2ccbf2ea4f10144282135872450000&jobFamilyGroup=e57e6863118d01f05fba5646202b9a68&jobFamilyGroup=e57e6863118d015d81424046202b8e68&jobFamilyGroup=e57e6863118d014b76cf0946202b7268&jobFamilyGroup=e57e6863118d01d369ceea45202b6268&jobFamilyGroup=4a582d47bc181014427f60f9cf010000&jobFamilyGroup=e57e6863118d0128b509be45202b4a68"}
+    # PwC intern roles live on their Phenom board; the old Workday
+    # Global_Experienced_Careers feed has zero intern postings (and 403s in CI)
+    - {name: "PwC", ats: "html", url: "https://jobs-ta.pwc.com/global/en/search-results?keywords=intern", css_selector: "li.jobs-list-item"}
     - {name: "DXC Technology", ats: "custom-portal", url: "https://careers.dxc.com/job-search-results/"}
     - {name: "Mountblue", ats: "custom-portal", url: "https://careers.mountblue.io/trainee/"}
     - {name: "FPT", ats: "custom-portal", url: "https://career.fpt-software.com/jobs-search"}

@@ -88,10 +88,12 @@ class HTMLFallbackScraper(BaseScraper):
                                 total_jobs += 1
                                 yield parsed
 
-                    # EA's portal paginates with <a class="...paginationNextLink">Next >></a>
+                    # EA's portal paginates with <a class="...paginationNextLink">Next >></a>,
+                    # Phenom with <a aria-label="View next page">
                     next_btn = await page.query_selector(
                         'button:has-text("Go to next page"), button:has-text("Next"), '
-                        'a[class*="paginationNext"], a:has-text("Next >>")'
+                        'a[class*="paginationNext"], a:has-text("Next >>"), '
+                        "a[aria-label*='next page' i]"
                     )
                     if not next_btn:
                         break
@@ -131,9 +133,15 @@ class HTMLFallbackScraper(BaseScraper):
         if not title:
             return None
 
-        location = await self._get_text(
-            card, ".location, .job-location, [data-location], [data-ui='job-location']"
+        # Phenom (PwC, Cognizant...) carries the clean value in a data attribute,
+        # before generic selectors that can pick up "Available in N locations" noise
+        location = await self._get_attr(
+            card, "[data-ph-at-job-location-text]", "data-ph-at-job-location-text"
         )
+        if not location:
+            location = await self._get_text(
+                card, ".location, .job-location, [data-location], [data-ui='job-location']"
+            )
         if location:
             location = location.replace("Location :", "").replace("Location:", "").strip()
         if not location:
@@ -201,6 +209,10 @@ class HTMLFallbackScraper(BaseScraper):
         description = await self._get_text(card, ".description, .job-description, .summary")
         employment_type = await self._get_text(card, ".type, .job-type, .employment-type")
         date_posted = await self._get_text(card, ".date, .posted-date, .job-date")
+        if not date_posted:
+            date_posted = await self._get_attr(
+                card, "[data-ph-at-job-post-date-text]", "data-ph-at-job-post-date-text"
+            )
 
         if url and not url.startswith("http"):
             from urllib.parse import urljoin
