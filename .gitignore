@@ -6,10 +6,7 @@ __pycache__/
 venv/
 
 # Project data
-data/jobs.db
-data/*.db-shm
-data/*.db-wal
-logs/*.log
+data/
 
 # Environment
 .env
@@ -25,3 +22,11 @@ Thumbs.db
 
 # Docker
 .docker/
+
+# Scratch/audit artifacts from link discovery and one-off runs
+*.log
+/audit*.py
+/discover*.py
+/verify_*.py
+data/*.json
+data/*.json.tmp

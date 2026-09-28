@@ -271,6 +271,11 @@ class TelegramNotifier(Notifier):
         parts.append(f"{elapsed_s / 60:.0f}m")
         return await self._send_messages(["✅ Tracker run done — " + " · ".join(parts)])
 
+    async def send_alert(self, title: str, body_lines: list[str]) -> bool:
+        """Free-form alert (link health, etc.), split across messages if long."""
+        messages = _split_message(title, body_lines)
+        return await self._send_messages(messages or [title])
+
     async def send_digest(
         self,
         jobs: list[tuple[Job, str]],

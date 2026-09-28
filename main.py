@@ -418,6 +418,62 @@ async def daily_job_wrapper(config_path: str):
     return await run_pipeline(config_path)
 
 
+async def run_check_links(config_path: str) -> int:
+    """Probe every company URL; Telegram only when a link changed state."""
+    from tracker.link_health import (
+        check_links,
+        diff_states,
+        format_alert,
+        load_snapshot,
+        save_snapshot,
+        suppress_for_outage,
+    )
+
+    config = load_config(config_path)
+    logger = get_logger()
+    report = await check_links(config)
+    curr = {name: rec["state"] for name, rec in report["results"].items()}
+    prev = load_snapshot()
+    newly_broken, recovered = diff_states(prev, curr)
+
+    counts = report["counts"]
+    summary = (
+        f"Link check: {report['total']} checked · {counts['ok']} ok · "
+        f"{counts['dead']} dead · {counts['blocked']} blocked"
+    )
+    logger.info(summary)
+    print(summary)
+    not_ok = sorted(n for n, s in curr.items() if s != "ok")
+    if not_ok:
+        # First run (no snapshot) never alerts, but the dead list is logged so
+        # baseline problems are still visible.
+        logger.warning("Not ok: %s", ", ".join(not_ok[:25]))
+
+    if suppress_for_outage(prev, newly_broken):
+        # mass failure = local DNS/network trouble, not link rot; keep the old
+        # snapshot so the next run doesn't "recover" everything either
+        logger.error(
+            "%d links failed at once — possible local outage, alert suppressed",
+            len(newly_broken),
+        )
+        return 1
+
+    save_snapshot(report)
+    if newly_broken or recovered:
+        sent = await TelegramNotifier(config.telegram).send_alert(
+            "🔗 Link health alert",
+            format_alert(report, newly_broken, recovered),
+        )
+        if not sent:
+            logger.error(
+                "Link alert not delivered; state was recorded, so only further "
+                "state changes will alert again"
+            )
+        for name in newly_broken:
+            print(f"✗ stopped working: {name}")
+    return 1 if newly_broken else 0
+
+
 def check_config(config_path: str) -> int:
     """Offline config validation. Returns exit code (0 ok, 1 errors)."""
     try:
@@ -481,6 +537,11 @@ def main() -> None:
         help="Validate config.yaml without scraping",
     )
     parser.add_argument(
+        "--check-links",
+        action="store_true",
+        help="Probe every company URL and alert on links that stopped working",
+    )
+    parser.add_argument(
         "--config",
         type=str,
         default=str(PROJECT_ROOT / "config.yaml"),
@@ -495,6 +556,11 @@ def main() -> None:
 
     if args.check_config:
         sys.exit(check_config(args.config))
+
+    if args.check_links:
+        config = load_config(args.config)
+        setup_logging(level=config.logging.level, file_path=config.logging.file)
+        sys.exit(asyncio.run(run_check_links(args.config)))
 
     if args.run_now:
         asyncio.run(run_now(args.config))
@@ -517,7 +583,14 @@ def main() -> None:
         async def job_wrapper():
             await run_pipeline(args.config)
 
-        asyncio.run(run_scheduler(config.schedule, job_wrapper))
+        extra_jobs = []
+        if config.link_check.enabled:
+            async def link_check_wrapper():
+                await run_check_links(args.config)
+
+            extra_jobs.append((config.link_check.time, link_check_wrapper))
+
+        asyncio.run(run_scheduler(config.schedule, job_wrapper, extra_jobs=extra_jobs))
     else:
         parser.print_help()
         sys.exit(1)

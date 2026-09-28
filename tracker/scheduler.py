@@ -11,12 +11,12 @@ def create_scheduler(schedule_cfg: ScheduleConfig) -> AsyncIOScheduler:
     return AsyncIOScheduler(timezone=schedule_cfg.timezone)
 
 
-def schedule_daily_job(
+def schedule_cron(
     scheduler: AsyncIOScheduler,
-    schedule_cfg: ScheduleConfig,
+    time_str: str,
     job_func: Callable[[], Coroutine],
 ) -> None:
-    hour, minute = schedule_cfg.time.split(":")
+    hour, minute = time_str.split(":")
     scheduler.add_job(
         job_func,
         trigger="cron",
@@ -25,12 +25,23 @@ def schedule_daily_job(
     )
 
 
-async def run_scheduler(
+def schedule_daily_job(
+    scheduler: AsyncIOScheduler,
     schedule_cfg: ScheduleConfig,
     job_func: Callable[[], Coroutine],
 ) -> None:
+    schedule_cron(scheduler, schedule_cfg.time, job_func)
+
+
+async def run_scheduler(
+    schedule_cfg: ScheduleConfig,
+    job_func: Callable[[], Coroutine],
+    extra_jobs: list[tuple[str, Callable[[], Coroutine]]] | None = None,
+) -> None:
     scheduler = create_scheduler(schedule_cfg)
     schedule_daily_job(scheduler, schedule_cfg, job_func)
+    for time_str, func in extra_jobs or []:
+        schedule_cron(scheduler, time_str, func)
     scheduler.start()
 
     stop_event = asyncio.Event()

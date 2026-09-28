@@ -5,6 +5,18 @@ import yaml
 from pydantic import BaseModel, Field, field_validator
 
 
+def _validate_hhmm(v: str) -> str:
+    parts = v.split(":")
+    if len(parts) != 2:
+        raise ValueError(f"Invalid time format '{v}'. Use HH:MM (24h).")
+    h, m = parts
+    if not (h.isdigit() and m.isdigit()):
+        raise ValueError(f"Invalid time format '{v}'. Use HH:MM (24h).")
+    if not (0 <= int(h) <= 23 and 0 <= int(m) <= 59):
+        raise ValueError(f"Time '{v}' out of range. Hours 0-23, minutes 0-59.")
+    return v
+
+
 class ScheduleConfig(BaseModel):
     time: str = "08:00"
     timezone: str = "Asia/Kolkata"
@@ -12,15 +24,19 @@ class ScheduleConfig(BaseModel):
     @field_validator("time")
     @classmethod
     def validate_time(cls, v: str) -> str:
-        parts = v.split(":")
-        if len(parts) != 2:
-            raise ValueError(f"Invalid time format '{v}'. Use HH:MM (24h).")
-        h, m = parts
-        if not (h.isdigit() and m.isdigit()):
-            raise ValueError(f"Invalid time format '{v}'. Use HH:MM (24h).")
-        if not (0 <= int(h) <= 23 and 0 <= int(m) <= 59):
-            raise ValueError(f"Time '{v}' out of range. Hours 0-23, minutes 0-59.")
-        return v
+        return _validate_hhmm(v)
+
+
+class LinkCheckConfig(BaseModel):
+    """Daily probe of every company URL; Telegram alert on state changes."""
+    enabled: bool = True
+    time: str = "07:30"
+
+    # a typo here must fail at config load, not int(hour) inside the daemon
+    @field_validator("time")
+    @classmethod
+    def validate_time(cls, v: str) -> str:
+        return _validate_hhmm(v)
 
 
 class DatabaseConfig(BaseModel):
@@ -127,6 +143,7 @@ class TieredCompanies(BaseModel):
 
 class AppConfig(BaseModel):
     schedule: ScheduleConfig = Field(default_factory=ScheduleConfig)
+    link_check: LinkCheckConfig = Field(default_factory=LinkCheckConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     scraper: ScraperConfig = Field(default_factory=ScraperConfig)
