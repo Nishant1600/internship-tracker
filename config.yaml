@@ -435,9 +435,8 @@ companies:
     - {name: "Jane Street", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/janestreet/jobs?content=true", skip_location_filter: true}
     - {name: "DRW", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/drweng/jobs?content=true", skip_location_filter: true}
     - {name: "PEAK6", ats: "html", url: "https://peak6.com/careers/", css_selector: "li.sui-result", skip_location_filter: true}
-    # restored: boards reachable again (old careers.bloomberg.com / gravitontrading /
-    # versor-inv.com URLs all dead); these boards carry real locations so the
-    # India city filter applies — no skip_location_filter
+    # restored: boards reachable again (old careers.bloomberg.com and
+    # gravitontrading.com URLs both dead); these boards carry real locations so
+    # the India city filter applies — no skip_location_filter
     - {name: "Bloomberg", ats: "html", url: "https://bloomberg.avature.net/careers/SearchJobs", css_selector: "article.article--result"}
     - {name: "Graviton Research Capital", ats: "greenhouse", url: "https://boards-api.greenhouse.io/v1/boards/gravitonresearchcapital/jobs?content=true"}
-    - {name: "Versor Investments", ats: "html", url: "https://www.versorinvest.com/careers/", css_selector: "div.job-col"}
