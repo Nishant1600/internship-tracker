@@ -1,6 +1,6 @@
 # Personal Internship Alert System
 
-A single-user Python application that scrapes career pages of 330+ companies, detects new internship postings, filters them against configurable preferences, and sends a Telegram digest every other day.
+A single-user Python application that scrapes career pages of 330+ companies, detects new internship postings, filters them against configurable preferences, and sends a Telegram digest twice daily.
 
 ## Quick Start
 
@@ -77,7 +77,7 @@ python main.py --daemon
 ```
 
 ### GitHub Actions
-`.github/workflows/internship-tracker.yml` runs tests then the pipeline every other day (06:00 IST) via `schedule`, with `BOT_TOKEN` and `CHAT_ID` repo secrets. Trigger manually with `workflow_dispatch`.
+`.github/workflows/internship-tracker.yml` runs tests then the pipeline twice daily (06:00 and 18:00 IST) via `schedule`, with `BOT_TOKEN` and `CHAT_ID` repo secrets. Trigger manually with `workflow_dispatch`.
 
 Reliability features:
 - The SQLite DB in `data/` persists between runs via the actions cache, so dedup works across runs.
