@@ -2,7 +2,7 @@ name: Internship Tracker
 
 on:
   schedule:
-    - cron: "30 0 1-31/2 * *"   # 06:00 IST (00:30 UTC), every other day
+    - cron: "30 0,12 * * *"     # 06:00 and 18:00 IST (00:30 and 12:30 UTC), daily
   workflow_dispatch:
 
 permissions:
